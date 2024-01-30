@@ -1,0 +1,115 @@
+//VISTA
+
+//Notes
+   
+//End Notes
+
+//Database
+SSRS rs_SeniorIHPPortfolioCensus.rdlc
+//End Database
+
+//Crystal
+CryActive Y
+Crytree Y
+param txtdate1 = #dat1#
+param txtdate2 = #dat2#
+param bIncludeSec = #bIncludeSec#
+param bAdditionalUnit = #bAdditionalUnit#
+param rptProperty = #p.hmy#
+param rptCareLevel= #CareLevel#
+param rptOccType= #OccType#
+param datemask=SELECT ISNULL((SELECT REPLACE(REPLACE(ci.sdatemask,'D','d'),'Y','y') FROM country_info ci, pmuser pm WHERE pm.scountry = ci.scode AND pm.uname = LTRIM(RTRIM( '#@@USERNAME#' ))), 'MM/dd/yyyy')
+//End Crystal
+
+//Title
+Portfolio Census 
+//end Title
+
+//Select No Crystal
+declare @BegMonth datetime
+declare @EndMonth datetime,
+@PropCode VARCHAR(4000),
+@CareLevelCode VARCHAR(4000),
+@iOccType VARCHAR(1),
+@bIncludeSec VARCHAR(3),
+@bIncludeMoveOutDate VARCHAR(3),
+@bAdditionalUnit VARCHAR(3)
+
+SET @BegMonth = #dat1#
+SET @EndMonth = #dat2#
+SET @bIncludeSec = '#bIncludeSec#'
+SET @bAdditionalUnit = '#bAdditionalUnit#'
+
+DECLARE @BegDefault DATETIME,
+        @EndDefault DATETIME;
+
+SET @BegDefault = '01/01/1900';
+SET @EndDefault = '12/31/2200';
+
+SET @propCode = ''
+DECLARE @encryptionEnabled INTEGER
+SET @encryptionEnabled=isnull( (SELECT svalue
+                         FROM   paramopt2
+                         WHERE  Upper(stype) = 'ENABLEDATAENCRYPTION'),0)
+
+SELECT @propCode = @propCode + CONVERT(VARCHAR(100), p.hmy) + ',' 
+FROM Property P
+WHERE
+1 = 1
+#condition1# 
+ 
+SET @propCode = LEFT( @propCode, Len( @propCode ) - 1 )
+
+SET @CareLevelCode = ''
+SELECT @CareLevelCode = @CareLevelCode + CONVERT(VARCHAR(100), l1.hmy) + ','
+FROM listoption l1
+WHERE l1.listname = 'CareLevel' 
+#condition3# 
+
+SET @CareLevelCode = LEFT( @CareLevelCode, Len( @CareLevelCode ) - 1 )
+
+SELECT @iOccType = case '#OccType#' when 'Physical Unit Based' then '1' 
+when 'Physical Lease Based' then '2'
+when 'Physical Unit Based (disregarding capacity)' then '3'
+when 'Financial Unit Based' then '4'
+when 'Financial Lease Based' then '5'
+else  '6' end
+
+SET @bIncludeMoveOutDate = CASE WHEN @iOccType IN ('1','2','3') THEN 'No' ELSE 'YES' END
+
+IF OBJECT_ID ('TempDb..#tmpOccupancyResultLocal') IS NOT NULL
+     DROP TABLE #tmpOccupancyResultLocal
+
+CREATE TAble #tmpOccupancyResultLocal (
+    PropertyId              NUMERIC, 
+    PropertyName            VARCHAR(255), 
+    CareLevelCode           VARCHAR(20), 
+	CareLevelName           VARCHAR(100), 
+    UnitCount               NUMERIC, 
+    UnitCapacity            NUMERIC, 
+    MoveInCount             NUMERIC(18, 2), 
+    MoveOutCount            NUMERIC(18, 2),
+    UnitOccupiedBeg         NUMERIC(18, 2),
+	UnitOccupiedEnd         NUMERIC(18, 2)  
+) 
+
+INSERT INTO #tmpOccupancyResultLocal
+EXEC SeniorIHPPortfolioCensusReport @hprop  = @propCode, @BOM = @BegMonth, @EOM = @EndMonth, @flag = @iOccType, @ShowSeccondResident = @bIncludeSec, @IncludeMoveOutDate = @bIncludeMoveOutDate, @CareLevel = @CareLevelCode, @AdditionalUnit = @bAdditionalUnit  
+
+//End Select
+
+//Select Main
+SELECT t.* 
+FROM #tmpOccupancyResultLocal t
+ORDER  BY 2,4	
+//End Select
+
+//Filter
+//Type, DataTyp,   				Name,                				Caption,  Key,    	List,             Val, Val2,  Mand,   Multi, Title  Title
+C,      T,       				 p.hMy,	                   Community,     ,       	61, p.hMy = #p.hMy#,     ,      ,      Y,   Y, 
+R,      A,    			 dat1:dat2,  							 		Date Range, 		,     			, 							 , 		 ,		 Y, 			,  	Y,
+M,      T,  				 CareLevel,										Care Level,     ,   "select ltrim(rtrim(l1.listoptionname)) from listoption l1 where l1.listname='Carelevel' and isnull(l1.listoptionActiveFlag,1) <> 0",   ltrim(rtrim(l1.listoptionname))= '#CareLevel#' , ,  ,     Y,   Y   ,
+L,      T,    				 OccType,     			 		Occupancy Type,   	,   "SELECT DISTINCT CASE WHEN sObjName='SHOccupancyPhysicalUnitBased' THEN 'Physical Unit Based' WHEN sObjName='SHOccupancyPhysicalLeaseBased' THEN 'Physical Lease Based' WHEN sObjName='SHOccupancyPhysicalUnitBaseddisregardingcapacity' THEN 'Physical Unit Based (disregarding capacity)' WHEN sObjName='SHOccupancyFinancialUnitBased' THEN 'Financial Unit Based' WHEN sObjName='SHOccupancyFinancialLeaseBased' THEN 'Financial Lease Based' WHEN sObjName='SHOccupancyFinancialUnitBaseddisregardingcapacity' THEN 'Financial Unit Based (disregarding capacity)' END, CASE WHEN sObjName='SHOccupancyPhysicalUnitBased' THEN 1 WHEN sObjName='SHOccupancyPhysicalLeaseBased' THEN 2 WHEN sObjName='SHOccupancyPhysicalUnitBaseddisregardingcapacity' THEN 3 WHEN sObjName='SHOccupancyFinancialUnitBased' THEN 4 WHEN sObjName='SHOccupancyFinancialLeaseBased' THEN 5 WHEN sObjName='SHOccupancyFinancialUnitBaseddisregardingcapacity' THEN 6 END  FROM isecurity2 i INNER JOIN pmgroup g ON i.hGroup = g.hmy INNER JOIN pmuser u ON u.hGroup = g.hmy WHERE iAccess= 2 and sObjName in ('SHOccupancyPhysicalUnitBased','SHOccupancyPhysicalLeaseBased','SHOccupancyPhysicalUnitBaseddisregardingcapacity','SHOccupancyFinancialUnitBased','SHOccupancyFinancialLeaseBased','SHOccupancyFinancialUnitBaseddisregardingcapacity') and u.uName = '#@@USERNAME#' and '#@@USERNAME#' <> '' UNION SELECT DISTINCT 'Physical Unit Based', 1 WHERE ('#@@USERNAME#' = '' OR CHARINDEX('@@USERNAME#', '#@@USERNAME#') > 0) UNION SELECT 'Physical Lease Based',2 WHERE ('#@@USERNAME#' = '' OR CHARINDEX('@@USERNAME#', '#@@USERNAME#') > 0) UNION SELECT 'Physical Unit Based (disregarding capacity)',3 WHERE ('#@@USERNAME#' = '' OR CHARINDEX('@@USERNAME#', '#@@USERNAME#') > 0) UNION SELECT 'Financial Unit Based',4 WHERE ('#@@USERNAME#' = '' OR CHARINDEX('@@USERNAME#', '#@@USERNAME#') > 0) UNION SELECT 'Financial Lease Based',5 WHERE ('#@@USERNAME#' = '' OR CHARINDEX('@@USERNAME#', '#@@USERNAME#') > 0) UNION SELECT 'Financial Unit Based (disregarding capacity)',6 WHERE ('#@@USERNAME#' = '' OR CHARINDEX('@@USERNAME#', '#@@USERNAME#') > 0) ORDER BY 2",                              ,     ,     Y,     N,     ,  
+L,      T, 				 bIncludeSec,			Include second resident?,   	,   "No^Yes",               ,      ,     N,     	N,    ,  
+L,      T, 				 bAdditionalUnit,			Include additional Unit?,   	,   "No^Yes",               ,      ,     N,     	N,    ,  
+//End Filter                  

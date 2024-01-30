@@ -1,0 +1,476 @@
+//Vista
+
+//Notes
+
+   Copy Right 2004 Yardi Systems
+   NAME: rs_SeniorOccupancyDetail.txt
+   DESCRIPTION:
+     An occupancy report that details for each resident in the specified community, showing unit/privacy, 
+     unit type and from to dates.  A Unit Days is calculated by multiplying the resident days times the 
+     occupancy factor associated with that residents privacy level, e.g., Single ==> 1.0, Double ==> 0.5.
+
+   DEPENDENCIES:
+     
+   MODIFIED:
+       Created: 08/04/2004
+       
+   PLATFORM: Sql server 2000
+   Tested:   with Voyager 50.07.09 for Senior Housing 2.0
+   01/15/2007 TR#83164  Added Exec Statement --Prasad Deshkar.
+   01/16/07 - TR#78995 - Namrata Gaiki: updated for Ltrim , Rtrim functions and Treeview. 	
+   02/15/2007- TR#  79348- Prasad Deshkar Resolved issue for repeating names 
+   10/11/2007- TR#106235- Smita Moon  Added Unit to sortby filter  
+   4/2/2008  - TR#114206 - removed the failing condition for nov/dec
+   14/05/2008- TR# 116846 Modified rpt to display summary section on a new page. 
+   04/13/2009 TR#185226 NG - Occupancy Summary and Detail section were not tying up.
+       		query written instead of using SeniorOccupancySummary stored procedure.
+   8/17/2009  TR#169390  - 60 Fromatting changes
+   06/15/2012 - TR#244599 - NG - Enhancement to add additional occupancy methods 
+   09/01/2015 - CASE#2812233 - VCH - Customize Occupancy Detail/Summary report
+//End Notes
+
+//Database
+SSRS rs_SeniorIHPOccupancyDetail_New.rdlc
+//End Database
+
+//Crystal
+CryActive Y
+Crytree Y
+param Month= #AsOfDate#
+param PropertyName=select ltrim(rtrim(saddr1))+'(' + ltrim(rtrim(scode)) +')' from property where scode= '#Community#'
+param PropertyCode='#Community#'
+param SortBy='#SortBy#'
+param DetailMonth= #AsOfDate#
+param DetailPropertyCode='#Community#'
+param DetailSortBy=#SortBy#
+param SummaryMonth= #AsOfDate#
+param SummaryPropertyCode='#Community#'
+param rptsortby=#SortBY#
+param rptType=#RepTyp#
+Param Flag=#OccType#
+param Version=5012.2226
+param tenantdrill=iData.ASP?WCI=begin&Action=E&iType=1&iFileType=&hMy=
+param tenantdrill1=iData.asp?WCI=begin&Action=Filter&iType=10&iFileType=&hMy=
+param datemask=SELECT ISNULL((SELECT REPLACE(REPLACE(ci.sdatemask,'D','d'),'Y','y') FROM country_info ci, pmuser pm WHERE pm.scountry = ci.scode AND pm.uname = LTRIM(RTRIM( '#@@USERNAME#' ))), 'MM/dd/yyyy')
+//End Crystal
+
+//Title
+Occupancy Detail/Summary
+//end title
+
+//Select No Crystal
+DECLARE @PropertyList VARCHAR(8000)
+
+DECLARE @AsOfDate DATETIME
+
+DECLARE @flag INTEGER
+
+DECLARE
+  @BOM DATETIME,
+  @EOM DATETIME
+
+select  @AsOfDate = '#AsOfDate#'
+
+select @flag=  
+ case  '#OccType#' 
+             WHEN 'Physical Unit Based' THEN 1
+             WHEN 'Physical Lease Based' THEN 2
+             WHEN 'Physical Unit Based (disregarding capacity)'   THEN 3
+             WHEN 'Financial Unit Based' THEN 4
+             WHEN 'Financial Lease Based' THEN 5
+             ELSE 6
+          END 
+ 
+SET @PropertyList=''
+
+SELECT
+  @PropertyList = @PropertyList + Ltrim( Rtrim( P.Scode ) ) + ','
+FROM   Property P
+WHERE  1 = 1  #condition1#
+
+
+SET @BOM = CONVERT ( VARCHAR(10), Datepart(mm,@AsOfDate), 101 ) + '/01/' + CONVERT ( VARCHAR(10), Datepart(yyyy,@AsOfDate), 101 ) 
+
+SET @EOM = CONVERT ( VARCHAR(10), @AsOfDate, 101 )
+
+CREATE TABLE #temp (
+  Hmy                      NUMERIC
+  ,Propertyid              NUMERIC
+  ,Propertyname            VARCHAR( 100 )
+  ,Property                VARCHAR( 100 )
+  ,Propcode                VARCHAR( 10 )
+  ,Unitid                  NUMERIC
+  ,Unitcode                VARCHAR( 30 )
+  ,Carelevelcode           VARCHAR( 20 )
+  ,Unittypeid              NUMERIC
+  ,Unittype                VARCHAR( 80 )
+  ,Unitcapacity            NUMERIC
+  ,Unitbudgetcapacity      NUMERIC
+  ,Residentid              NUMERIC
+  ,Residentname            VARCHAR( 100 )
+  ,Dtmovein                DATETIME
+  ,Dtmoveout               DATETIME
+  ,Serviceinstancefromdate DATETIME
+  ,Serviceinstancetodate   DATETIME
+  ,Privacylevelcode        VARCHAR( 10 )
+  ,Rescarelvlcode          VARCHAR( 10 )
+  ,Residentstatus          NUMERIC ( 18, 0 )
+  ,Contracttypecode        VARCHAR( 10 )
+  ,Unitbasedocc            NUMERIC( 18, 2 )
+  ,Leasebasedocc           NUMERIC( 18, 2 )
+  ,Unitbaseddcocc          NUMERIC( 18, 2 )
+  ,Unitexcludeflag         BIT
+  ,Fromdate                DATETIME
+  ,Todate                  DATETIME 
+  ,Dcdaycount              NUMERIC 
+  )
+
+
+
+INSERT INTO #temp 
+EXEC SeniorOccupancyDetails @PropertyList , @BOM, @EOM, @flag, 'yes','Report'
+
+CREATE TABLE #unittype
+  (
+  	 Hmy NUMERIC Identity	
+     , Propertyid               NUMERIC
+     ,Propertyname            VARCHAR( 100 )
+     ,Propcode                VARCHAR( 10 )
+     ,Unitid									NUMERIC
+     ,Unitcode                VARCHAR( 15 )
+     ,Unittypeid  						NUMERIC
+     ,Unittype                VARCHAR( 40 )
+     ,Unitcapacity            NUMERIC
+     ,Unitbudgetcapacity      NUMERIC
+     ,unitExcludeFlag 				bit 
+     ,Carelevelcode           VARCHAR( 10 )
+     ,Privacylvlcode          VARCHAR( 10 )
+     ,Residentid              NUMERIC
+     ,Residentname            VARCHAR( 100 )
+     ,Dtmovein                DATETIME
+     ,Dtmoveout               DATETIME
+     ,UnitBasedOcc                  NUMERIC( 18, 2 )
+     ,LeaseBasedOcc                  NUMERIC( 18, 2 )
+     ,UnitBasedDCOcc                NUMERIC( 18, 2 )
+     ,Serviceinstancefromdate DATETIME
+     ,Serviceinstancetodate   DATETIME
+     ,ResidentdayCount NUMERIC
+     ,UnitDayCount  NUMERIC(18,2)
+     ,DcDayCount Numeric
+  )
+
+INSERT INTO #unittype
+SELECT
+      Propertyid                                
+     ,Propertyname                              
+     ,Propcode                                  
+     ,UnitId
+     ,Unitcode  
+     ,Unittypeid                                
+     ,Unittype                                  
+     ,Unitcapacity                              
+     ,Unitbudgetcapacity  
+     ,unitExcludeFlag                      
+     ,Carelevelcode                             
+     ,PrivacyLevelcode                            
+     ,Residentid                                
+     ,Residentname                              
+     ,FromDate                                  
+     ,Todate                               
+     ,UnitBasedOcc                                    
+     ,LeaseBasedOcc                                    
+     ,UnitBasedDCOcc                                  
+     ,Serviceinstancefromdate                   
+     ,Serviceinstancetodate                     
+  	 ,0
+  	 ,0
+  	 ,Dcdaycount
+FROM  #temp
+
+update #unittype  set dcDaycount =0 
+where hmy not in (select ut.hmy 
+from #unittype ut inner join
+(Select MIN(hmy) hmy , UnitId,dcDayCount From #unittype group by UnitId,dcDayCount  ) tmp on tmp.hmy = ut.hmy
+)
+
+
+
+UPDATE #unittype
+SET    
+ /* Residentdaycount = 30
+       ,Unitdaycount = 15
+     ,Dtmovein = CASE
+                      WHEN @BOM > CASE
+                                     WHEN @flag IN( 1, 2, 3 ) THEN Dtmovein
+                                     ELSE Serviceinstancefromdate
+                                  END THEN @Bom
+                      ELSE
+                        CASE
+                           WHEN @flag IN( 1, 2, 3 ) THEN Dtmovein
+                           ELSE Serviceinstancefromdate
+                        END
+                   END
+       ,Dtmoveout = CASE
+                       WHEN @eOM < Isnull( CASE
+                                              WHEN @flag IN( 1, 2, 3 ) THEN Dtmoveout
+                                              ELSE Serviceinstancetodate
+                                           END, '01/01/2100' ) THEN @eom
+                       ELSE Isnull( CASE
+                                       WHEN @flag IN( 1, 2, 3 ) THEN
+                                         CASE
+                                            WHEN Dtmoveout < @BOM THEN @EOM /*Done to check for the existing data issue status current and dtmoveout exists*/
+                                            ELSE Dtmoveout
+                                         END
+                                       ELSE Serviceinstancetodate
+                                    END, '01/01/2100' )
+                    END */
+                    Dtmovein = CASE
+                      WHEN @BOM > Dtmovein THEN @Bom
+                      ELSE Dtmovein END
+       ,Dtmoveout = CASE WHEN @eOM < Isnull(  Dtmoveout, '01/01/2100' ) THEN @eom
+                       		ELSE CASE
+                                            WHEN  Isnull(  Dtmoveout, '01/01/2100' ) < @BOM THEN @EOM /*Done to check for the existing data issue status current and dtmoveout exists*/
+                                            ELSE  Isnull(  Dtmoveout, '01/01/2100' )
+                                         END
+                                    end
+                                    
+                    
+
+      	
+UPDATE #unittype
+SET    Residentdaycount = datediff(dd,Dtmovein,Dtmoveout)+1
+       
+       
+create TABLE #Summary (
+  Communityname         VARCHAR( 80 )
+  ,Communitycode        VARCHAR( 20 )
+  ,Carelevelcode        VARCHAR( 3 )
+  ,Careleveldescription VARCHAR( 50 )
+  ,UnitTypeId						NUMERIC
+  ,Unittypedescription  VARCHAR( 60 )
+  ,Daycount             SMALLINT
+  ,Capacitycount        SMALLINT
+  ,Budgetcount          SMALLINT
+  ,Unitcount            SMALLINT
+  ,Residentcount        SMALLINT
+  ,SecondResidentcount        SMALLINT
+  ,Residentdaycount     NUMERIC(18,2)
+  ,ResidentUnitdays     NUMERIC(18,2)
+  ,Additionalcount      SMALLINT )
+
+DECLARE @Additional TABLE (
+  Ocommunitycode         VARCHAR( 80 )
+  ,Ocareleveldescription VARCHAR( 50 )
+  ,Ounittypedescription  VARCHAR( 60 )
+  ,Oadditionalcount      SMALLINT )
+
+  
+  
+INSERT INTO #summary
+SELECT
+  Propertyname,
+  Propcode,
+  Carelevelcode,
+  L.Listoptionname,
+  occ.Unittypeid,
+  Ltrim( Rtrim( Isnull( Ut.Sdesc, '' ) ) ) + ' (' + Ltrim( Rtrim( Ut.Scode ) ) + ')',
+  ( Datediff( Dd, @BOM, @EOM ) + 1 ) ,
+  0,
+  0,
+  Count ( DISTINCT Unitid ),
+  count(distinct case when Residentid <> 0 and Privacylvlcode <> 'SEC' then Residentid end ),
+  count(distinct  case when Residentid <> 0 and Privacylvlcode = 'SEC' then Residentid end ),
+  sum(Residentdaycount),
+  Sum( CASE @flag
+          WHEN 1 THEN UnitBasedOcc
+          WHEN 2 THEN LeaseBasedOcc
+          WHEN 3 THEN UnitBasedDCOcc
+          WHEN 4 THEN UnitBasedOcc
+          WHEN 5 THEN LeaseBasedOcc
+          WHEN 6 THEN UnitBasedDCOcc
+       END * case when @flag In (3,6) then DcDayCount else  Residentdaycount end),
+  0
+FROM      #unittype Occ
+LEFT JOIN Unittype Ut ON Ut.Hmy = Unittypeid
+LEFT JOIN Listoption L ON L.Listoptioncode = Occ.Carelevelcode
+                          AND L.Listname = 'CareLevel'
+LEFT JOIN Listoptionvalue V ON V.Listname = 'PrivacyLevel'
+                               AND V.Listoptioncode = Occ.Privacylvlcode
+WHERE     Occ.Unitexcludeflag = 0
+GROUP     BY
+  Propcode,
+  Propertyname,
+  Carelevelcode,
+  L.Listoptionname,
+  occ.Unittypeid,
+  Ltrim( Rtrim( Isnull( Ut.Sdesc, '' ) ) ) + ' (' + Ltrim( Rtrim( Ut.Scode ) ) + ')'
+  
+update s
+set Capacitycount=  cpcty1.capacity,
+ BudgetCount=  cpcty1.budgetcapacity
+from  #summary s
+Inner join
+(
+select propCode, carelevelcode, UnitTypeid,sum(unitcapacity) Capacity ,sum(Unitbudgetcapacity) budgetcapacity   
+from  
+(select distinct ut.propCode,ut.carelevelcode,ut.UnitTypeid,ut.unitid,ut.unitcapacity ,ut.Unitbudgetcapacity
+from   #unittype ut 
+)cpcty 
+group by propCode, carelevelcode, UnitTypeid
+)cpcty1 on s.communityCode=cpcty1.propCode and s.carelevelcode=cpcty1.carelevelcode and s.unitTypeid=cpcty1.unitTypeid
+
+  
+  
+ INSERT INTO @Additional
+SELECT
+  Ltrim( Rtrim( P.Propertycode ) ),
+  Ltrim( Rtrim( Cl.Listoptionname ) ),
+  Ltrim( Rtrim( Isnull( Ut.Sdesc, '' ) ) ) + ' (' + Ltrim( Rtrim( Ut.Scode ) ) + ')',
+  Count( Contactid )
+FROM   Tenant T,
+       Dbo.Seniorpropertyfunctionall( '', @PropertyList ) P,
+       Seniorcontact C,
+       Listoption Cl,
+       Unit U,
+       Seniorunit Su,
+       Unittype Ut
+WHERE  T.Hmyperson = C.Residentid
+   AND C.Contactroommateflag = 1
+   AND Contactactiveflag = 1
+   AND T.Hproperty = P.Propertyid
+   AND U.Hproperty = P.Propertyid
+   AND Su.Carelevelcode = Cl.Listoptioncode
+   AND Cl.Listname = 'CareLevel'
+   AND Cl.Listoptionactiveflag = 1
+   AND Hunit = U.Hmy
+   AND U.Hunittype = Ut.Hmy
+   AND U.Hmy = Su.Unitid
+   AND U.Exclude = 0
+   AND T.Istatus IN ( 0, 4, 11 )
+GROUP  BY
+  Ltrim( Rtrim( P.Propertycode ) ),
+  Ltrim( Rtrim( Cl.Listoptionname ) ),
+  Ltrim( Rtrim( Isnull( Ut.Sdesc, '' ) ) ) + ' (' + Ltrim( Rtrim( Ut.Scode ) ) + ')'
+    
+UPDATE #Summary
+SET    Additionalcount = Oadditionalcount
+FROM   @Additional
+WHERE  Communitycode = Ocommunitycode
+   AND Careleveldescription = Ocareleveldescription
+   AND Unittypedescription = Ounittypedescription
+//End Select
+
+//select
+Select propertyName CommunityName from #UnitType	
+//end select
+
+
+//SELECT OccupancyDetail
+DECLARE @flag INTEGER
+
+select @flag= 
+	case  '#OccType#' 
+             WHEN 'Physical Unit Based' THEN 1
+             WHEN 'Physical Lease Based' THEN 2
+             WHEN 'Physical Unit Based(disregarding capacity)' THEN 3
+             WHEN 'Financial Unit Based' THEN 4
+             WHEN 'Financial Lease Based' THEN 5
+             ELSE 6
+          END
+SELECT
+  Propertyname                                                                       Communityname,
+  Residentname,
+  ltrim(rtrim(Unitcode)) + ' - ' + V.Listoptionname                                                Unit,
+  Ltrim( Rtrim( Isnull( Ut.Sdesc, '' ) ) ) + ' (' + Ltrim( Rtrim( Ut.Scode ) ) + ')' Unittype,
+  (convert (varchar(10),dtmovein,101))	                                                                           Fromdate,
+  (convert (varchar(10),Dtmoveout ,101))                                                                         Todate,
+  /*sum(case when occ.Privacylvlcode ='SEC' then 0 else Residentdaycount end) Residentdaycount,*/
+  sum( Residentdaycount ) Residentdaycount,
+   sum(CASE @flag
+          WHEN 1 THEN UnitBasedOcc
+          WHEN 2 THEN LeaseBasedOcc
+          WHEN 3 THEN UnitBasedDCOcc
+          WHEN 4 THEN UnitBasedOcc
+          WHEN 5 THEN LeaseBasedOcc
+          WHEN 6 THEN UnitBasedDCOcc
+       END * Residentdaycount) Unitdaycount,
+  CASE '#SortBy#'
+     WHEN 'Resident' THEN Residentname
+     WHEN 'Unit' THEN Unitcode
+     WHEN 'Unit Type' THEN Unittype
+  END          Sortkey
+FROM      #unittype Occ
+LEFT JOIN Unittype Ut ON Ut.Hmy = Unittypeid
+LEFT JOIN Listoption V ON V.Listname = 'PrivacyLevel' AND V.Listoptioncode = Occ.Privacylvlcode 
+where Residentid <> 0
+Group By  Propertyname                                                                       ,
+  Residentname,
+  ltrim(rtrim(Unitcode)) + ' - ' + V.Listoptionname                                                ,
+  Ltrim( Rtrim( Isnull( Ut.Sdesc, '' ) ) ) + ' (' + Ltrim( Rtrim( Ut.Scode ) ) + ')' ,
+  CASE '#SortBy#'
+     WHEN 'Resident' THEN Residentname
+     WHEN 'Unit' THEN Unitcode
+     WHEN 'Unit Type' THEN Unittype
+  END        ,(convert (varchar(10),dtmovein,101))	,  (convert (varchar(10),Dtmoveout ,101))  
+//end select
+
+//select OccupancySummary
+DECLARE @flag INTEGER
+
+declare @date date
+set @date=GETDATE()
+
+select @flag= 
+	case  '#OccType#' 
+             WHEN 'Physical Unit Based' THEN 1
+             WHEN 'Physical Lease Based' THEN 2
+             WHEN 'Physical Unit Based(disregarding capacity)' THEN 3
+             WHEN 'Financial Unit Based' THEN 4
+             WHEN 'Financial Lease Based' THEN 5
+             ELSE 6
+          END
+   SELECT    
+   	  CommunityName CommunityName,
+            CareLevelCode,
+            CareLevelDescription,
+            UnitTypeDescription,
+            isnull(SUM(case  when  @flag in (2,5) then Capacitycount else Unitcount end) * SUM( DayCount),0)  DayCount,
+            isnull(SUM(CapacityCount),0) CapacityCount,
+            isnull(SUM(BudgetCount),0) BudgetCount,
+            isnull(SUM(case  when  @flag in (2,5) then Capacitycount else Unitcount end),0)  UnitCount,
+            isnull(SUM(ResidentCount),0) ResidentCount,
+            isnull(sum(SecondResidentcount),0) +  isnull(SUM(AdditionalCount),0) SecondResidentcount,
+            isnull(SUM(ResidentDayCount),0) ResidentDayCount,
+            isnull(SUM(ResidentUnitDays) / 30 ,0) ResidentUnitDays,
+            isnull(SUM(AdditionalCount),0) AdditionalCount,
+            CommunityCode communityCode,
+            CommunityName ListName 
+   FROM     #Summary
+   GROUP BY  CommunityName  , communityCode            ,
+            CareLevelCode,
+            CareLevelDescription,
+            UnitTypeDescription
+//end select
+	
+
+//Select No Crystal After
+Drop Table #UnitType
+Drop Table #Summary
+//End Select
+
+
+//Filter    
+//Type, DTyp, Name,           Caption, 	   Key,                          List,   Val1,  Val2,	Man,	Multi, 	Title  Title
+0,      T,    Community,      Community,     ,  	                    61,      p.scode='#Community#' ,      ,	  Y,	    N,       ,
+0,      A,    AsOfDate,          Date,  	     ,      	                     ,       ,      ,     Y,        N,       ,
+L,      T,   OccType,	    Occupancy Type,   ,   "Physical Unit Based^Physical Lease Based^Physical Unit Based (disregarding capacity)^Financial Unit Based^Financial Lease Based^Financial Unit Based(disregarding capacity)",                              ,     ,     Y,     N,     ,  
+L,      T,    SortBy,         Sort By,       ,        Resident^Unit Type^Unit,       ,      ,     Y,        N,       ,
+L,      T,    RepTyp,         Report Type,       ,        Detail^Summary^Both,       ,      ,     Y,        N,       ,
+
+
+
+
+
+
+EOMONTH()
+//end filter

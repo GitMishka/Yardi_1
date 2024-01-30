@@ -1,0 +1,2204 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <DataSources>
+    <DataSource Name="SH_SSRS_DEV_SSRSConnectionString">
+      <rd:DataSourceID>f708e3e3-a56d-42a3-998c-98718fbc8243</rd:DataSourceID>
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString>Data Source=YSIINSQLQADB\SQLQADB_2K8R2;Initial Catalog=SH_SSRS_DEV_SSRS;User ID=shssrs;Password=shssrs</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <InteractiveHeight>11in</InteractiveHeight>
+  <ReportParameters>
+    <ReportParameter Name="AsOfMonth">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>AsOfMonth</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Prop">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>Prop</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Output">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>Report_Parameter_2</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ReportFor">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>Report_Parameter_3</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="MoveInDrill">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>Report_Parameter_4</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="MoveOutDrill">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>Report_Parameter_5</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <rd:DrawGrid>true</rd:DrawGrid>
+  <InteractiveWidth>8.5in</InteractiveWidth>
+  <rd:SnapToGrid>false</rd:SnapToGrid>
+  <RightMargin>0.25in</RightMargin>
+  <LeftMargin>0.25in</LeftMargin>
+  <PageHeader>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <ReportItems>
+      <Textbox Name="textbox2">
+        <rd:DefaultName>textbox2</rd:DefaultName>
+        <Visibility>
+          <Hidden>=Parameters!ReportFor.Value = "None"</Hidden>
+        </Visibility>
+        <Top>0.19792in</Top>
+        <Width>1.22917in</Width>
+        <Style>
+          <FontFamily>Tahoma</FontFamily>
+          <FontSize>7pt</FontSize>
+          <TextAlign>Right</TextAlign>
+          <PaddingLeft>1pt</PaddingLeft>
+          <PaddingRight>1pt</PaddingRight>
+          <PaddingTop>1pt</PaddingTop>
+          <PaddingBottom>1pt</PaddingBottom>
+        </Style>
+        <ZIndex>1</ZIndex>
+        <CanGrow>true</CanGrow>
+        <Left>9.15625in</Left>
+        <Value>="Page " &amp; Globals!PageNumber</Value>
+      </Textbox>
+      <Textbox Name="textbox8">
+        <rd:DefaultName>textbox8</rd:DefaultName>
+        <Top>0.10417in</Top>
+        <Width>4.71875in</Width>
+        <Style>
+          <FontFamily>Tahoma</FontFamily>
+          <FontWeight>700</FontWeight>
+          <PaddingLeft>1pt</PaddingLeft>
+          <PaddingRight>1pt</PaddingRight>
+          <PaddingTop>1pt</PaddingTop>
+          <PaddingBottom>1pt</PaddingBottom>
+        </Style>
+        <CanGrow>true</CanGrow>
+        <Value>=IIF(Globals!PageNumber = 1,"Move-In and Move-Out Analysis Report","")</Value>
+      </Textbox>
+    </ReportItems>
+    <Height>0.35792in</Height>
+    <PrintOnLastPage>true</PrintOnLastPage>
+  </PageHeader>
+  <BottomMargin>0.25in</BottomMargin>
+  <rd:ReportID>af1e3d3c-6711-4c5f-a1f7-c4e6ce59dc58</rd:ReportID>
+  <PageWidth>11in</PageWidth>
+  <DataSets>
+    <DataSet Name="rs_SeniorMoveInMoveOutAnalysis_DataTable1">
+      <Fields>
+        <Field Name="Pcode">
+          <DataField>Pcode</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="PropName">
+          <DataField>PropName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="SectionType">
+          <DataField>SectionType</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Description">
+          <DataField>Description</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Month1">
+          <DataField>Month1</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Total">
+          <DataField>Total</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Month2">
+          <DataField>Month2</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Month3">
+          <DataField>Month3</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Month4">
+          <DataField>Month4</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Month5">
+          <DataField>Month5</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Month6">
+          <DataField>Month6</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Month7">
+          <DataField>Month7</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Month8">
+          <DataField>Month8</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Month9">
+          <DataField>Month9</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Month10">
+          <DataField>Month10</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Month11">
+          <DataField>Month11</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Month12">
+          <DataField>Month12</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Month13">
+          <DataField>Month13</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+      </Fields>
+      <Query>
+        <DataSourceName>SH_SSRS_DEV_SSRSConnectionString</DataSourceName>
+        <CommandText>SELECT 
+       Ltrim(Rtrim(p.scode))			AS Pcode,
+       'Plano commons (Sh10)'		AS PropName,
+       'Move Ins by Lead Category'	AS SectionType,
+       'Move Ins by Lead Category'	AS Description,
+       p.hmy  				AS Month1,
+       p.hmy				AS Total,
+       p.hmy  				AS Month2,
+       p.hmy 				AS Month3,
+       p.hmy 				AS Month4,
+       p.hmy 				AS Month5,
+       p.hmy 				AS Month6,
+       p.hmy 				AS Month7,
+       p.hmy 				AS Month8,
+       p.hmy 				AS Month9,
+       p.hmy 				AS Month10,
+       p.hmy 				AS Month11,
+       p.hmy 				AS Month12,
+       p.hmy 				AS Month13
+FROM Property p</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <rd:DataSetInfo>
+        <rd:DataSetName>rs_SeniorMoveInMoveOutAnalysis</rd:DataSetName>
+        <rd:TableName>DataTable1</rd:TableName>
+        <rd:TableAdapterName>DataTable1TableAdapter</rd:TableAdapterName>
+        <rd:TableAdapterFillMethod>Fill</rd:TableAdapterFillMethod>
+        <rd:TableAdapterGetDataMethod>GetData</rd:TableAdapterGetDataMethod>
+      </rd:DataSetInfo>
+    </DataSet>
+  </DataSets>
+  <Code>Function dtFrom()
+
+
+
+End Function</Code>
+  <Width>10.45679in</Width>
+  <Body>
+    <ReportItems>
+      <Table Name="table1">
+        <DataSetName>rs_SeniorMoveInMoveOutAnalysis_DataTable1</DataSetName>
+        <Filters>
+          <Filter>
+            <FilterExpression>=Fields!PropName.Value</FilterExpression>
+            <Operator>NotEqual</Operator>
+            <FilterValues>
+              <FilterValue>=""</FilterValue>
+            </FilterValues>
+          </Filter>
+          <Filter>
+            <FilterExpression>=Fields!PropName.Value</FilterExpression>
+            <Operator>NotEqual</Operator>
+            <FilterValues>
+              <FilterValue>=NOTHING</FilterValue>
+            </FilterValues>
+          </Filter>
+        </Filters>
+        <TableGroups>
+          <TableGroup>
+            <Grouping Name="Dummy">
+              <GroupExpressions>
+                <GroupExpression>=IIF( Parameters!ReportFor.Value = "Unconsolidated",Fields!PropName.Value,"1")</GroupExpression>
+              </GroupExpressions>
+              <PageBreakAtEnd>true</PageBreakAtEnd>
+            </Grouping>
+            <Footer>
+              <TableRows>
+                <TableRow>
+                  <TableCells>
+                    <TableCell>
+                      <ColSpan>15</ColSpan>
+                      <ReportItems>
+                        <Textbox Name="textbox53">
+                          <rd:DefaultName>textbox53</rd:DefaultName>
+                          <Style>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value />
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                  </TableCells>
+                  <Height>0.16in</Height>
+                </TableRow>
+              </TableRows>
+            </Footer>
+          </TableGroup>
+          <TableGroup>
+            <Grouping Name="Pcode">
+              <Label>=Fields!PropName.Value</Label>
+              <GroupExpressions>
+                <GroupExpression>=Fields!PropName.Value</GroupExpression>
+              </GroupExpressions>
+            </Grouping>
+            <Header>
+              <TableRows>
+                <TableRow>
+                  <TableCells>
+                    <TableCell>
+                      <ColSpan>15</ColSpan>
+                      <ReportItems>
+                        <Textbox Name="textbox51">
+                          <rd:DefaultName>textbox51</rd:DefaultName>
+                          <Style>
+                            <BorderStyle>
+                              <Top>Solid</Top>
+                              <Bottom>None</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Left</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=IIF(Parameters!ReportFor.Value = "Consolidated" or Parameters!ReportFor.Value = "None" ,"",Fields!PropName.Value)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                  </TableCells>
+                  <Height>0.16in</Height>
+                </TableRow>
+              </TableRows>
+              <RepeatOnNewPage>true</RepeatOnNewPage>
+            </Header>
+          </TableGroup>
+          <TableGroup>
+            <Grouping Name="SectionType">
+              <Label>=Fields!SectionType.Value</Label>
+              <GroupExpressions>
+                <GroupExpression>=Fields!SectionType.Value</GroupExpression>
+              </GroupExpressions>
+            </Grouping>
+            <Sorting>
+              <SortBy>
+                <SortExpression>=Fields!SectionType.Value</SortExpression>
+                <Direction>Ascending</Direction>
+              </SortBy>
+            </Sorting>
+            <Header>
+              <TableRows>
+                <TableRow>
+                  <Visibility>
+                    <Hidden>= Parameters!ReportFor.Value = "None"</Hidden>
+                  </Visibility>
+                  <TableCells>
+                    <TableCell>
+                      <ColSpan>2</ColSpan>
+                      <ReportItems>
+                        <Textbox Name="textbox6">
+                          <rd:DefaultName>textbox6</rd:DefaultName>
+                          <Style>
+                            <BorderStyle>
+                              <Top>None</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Left</TextAlign>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=IIF( Fields!SectionType.Value = "Move Ins by Lead Category" , "Move Ins by Lead Category" , "Move Outs by Reason Code")</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox10">
+                          <Style>
+                            <BorderStyle>
+                              <Left>None</Left>
+                              <Right>None</Right>
+                              <Top>None</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Left(MonthName(Month(DateAdd("m",-11,Parameters!AsOfMonth.Value)),true),3)+"-"+Right(DateAdd("m",-11,Parameters!AsOfMonth.Value),2)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox13">
+                          <Style>
+                            <BorderStyle>
+                              <Left>None</Left>
+                              <Right>None</Right>
+                              <Top>None</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Left(MonthName(Month(DateAdd("m",-10,Parameters!AsOfMonth.Value)),true),3)+"-"+Right(DateAdd("m",-10,Parameters!AsOfMonth.Value),2)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox16">
+                          <Style>
+                            <BorderStyle>
+                              <Left>None</Left>
+                              <Right>None</Right>
+                              <Top>None</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Left(MonthName(Month(DateAdd("m",-9,Parameters!AsOfMonth.Value)),true),3)+"-"+Right(DateAdd("m",-9,Parameters!AsOfMonth.Value),2)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox19">
+                          <Style>
+                            <BorderStyle>
+                              <Left>None</Left>
+                              <Right>None</Right>
+                              <Top>None</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Left(MonthName(Month(DateAdd("m",-8,Parameters!AsOfMonth.Value)),true),3)+"-"+Right(DateAdd("m",-8,Parameters!AsOfMonth.Value),2)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox22">
+                          <Style>
+                            <BorderStyle>
+                              <Left>None</Left>
+                              <Right>None</Right>
+                              <Top>None</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Left(MonthName(Month(DateAdd("m",-7,Parameters!AsOfMonth.Value)),true),3)+"-"+Right(DateAdd("m",-7,Parameters!AsOfMonth.Value),2)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox25">
+                          <Style>
+                            <BorderStyle>
+                              <Left>None</Left>
+                              <Right>None</Right>
+                              <Top>None</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Left(MonthName(Month(DateAdd("m",-6,Parameters!AsOfMonth.Value)),true),3)+"-"+Right(DateAdd("m",-6,Parameters!AsOfMonth.Value),2)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox46">
+                          <Style>
+                            <BorderStyle>
+                              <Left>None</Left>
+                              <Right>None</Right>
+                              <Top>None</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Left(MonthName(Month(DateAdd("m",-5,Parameters!AsOfMonth.Value)),true),3)+"-"+Right(DateAdd("m",-5,Parameters!AsOfMonth.Value),2)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox1">
+                          <Style>
+                            <BorderStyle>
+                              <Left>None</Left>
+                              <Right>None</Right>
+                              <Top>None</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Left(MonthName(MOnth(DateAdd("m",-4,Parameters!AsOfMonth.Value)),true),3)+"-"+Right(DateAdd("m",-4,Parameters!AsOfMonth.Value),2)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox28">
+                          <rd:DefaultName>textbox28</rd:DefaultName>
+                          <Style>
+                            <BorderStyle>
+                              <Left>None</Left>
+                              <Right>None</Right>
+                              <Top>None</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Left(MonthName(Month(DateAdd("m",-3,Parameters!AsOfMonth.Value)),true),3)+"-"+Right(DateAdd("m",-3,Parameters!AsOfMonth.Value),2)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox31">
+                          <rd:DefaultName>textbox31</rd:DefaultName>
+                          <Style>
+                            <BorderStyle>
+                              <Left>None</Left>
+                              <Right>None</Right>
+                              <Top>None</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Left(MonthName(Month(DateAdd("m",-2,Parameters!AsOfMonth.Value)),true),3)+"-"+Right(DateAdd("m",-2,Parameters!AsOfMonth.Value),2)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox34">
+                          <rd:DefaultName>textbox34</rd:DefaultName>
+                          <Style>
+                            <BorderStyle>
+                              <Left>None</Left>
+                              <Right>None</Right>
+                              <Top>None</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Left(MonthName(Month(DateAdd("m",-1,Parameters!AsOfMonth.Value)),true),3)+"-"+Right(DateAdd("m",-1,Parameters!AsOfMonth.Value),2)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox43">
+                          <rd:DefaultName>textbox43</rd:DefaultName>
+                          <Style>
+                            <BorderStyle>
+                              <Left>None</Left>
+                              <Right>None</Right>
+                              <Top>None</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Left(MonthName(month(Parameters!AsOfMonth.Value),true),3)+"-"+Right(Parameters!AsOfMonth.Value,2)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox37">
+                          <rd:DefaultName>textbox37</rd:DefaultName>
+                          <Style>
+                            <BorderStyle>
+                              <Left>None</Left>
+                              <Right>None</Right>
+                              <Top>None</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>12-Month Total</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                  </TableCells>
+                  <Height>0.16in</Height>
+                </TableRow>
+              </TableRows>
+              <RepeatOnNewPage>true</RepeatOnNewPage>
+            </Header>
+            <Footer>
+              <TableRows>
+                <TableRow>
+                  <Visibility>
+                    <Hidden>= TRIM(Parameters!ReportFor.Value) = "None"</Hidden>
+                  </Visibility>
+                  <TableCells>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox65">
+                          <rd:DefaultName>textbox65</rd:DefaultName>
+                          <Style>
+                            <BorderStyle>
+                              <Top>Solid</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Left</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>Total</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox114">
+                          <rd:DefaultName>textbox114</rd:DefaultName>
+                          <Style>
+                            <BorderStyle>
+                              <Top>Solid</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Left</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value />
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox55">
+                          <rd:DefaultName>textbox55</rd:DefaultName>
+                          <Action>
+                            <Hyperlink>= IIF( RunningValue(Fields!Month2.Value,SUM,"SectionType") &gt; 0,
+
+IIF( Fields!SectionType.Value = "Move Ins by Lead Category",
+    "javascript:void(window.open('" &amp; Parameters!MoveInDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-11,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-11,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-In Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"  
+
+,
+"javascript:void(window.open('" &amp; Parameters!MoveOutDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-11,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-11,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-Out Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"
+ )
+ 
+ ,"")</Hyperlink>
+                          </Action>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>Solid</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Sum(Fields!Month2.Value)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox56">
+                          <rd:DefaultName>textbox56</rd:DefaultName>
+                          <Action>
+                            <Hyperlink>= IIF( RunningValue(Fields!Month3.Value,SUM,"SectionType") &gt; 0,
+
+IIF( Fields!SectionType.Value = "Move Ins by Lead Category",
+    "javascript:void(window.open('" &amp; Parameters!MoveInDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-10,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-10,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-In Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"  
+
+,
+"javascript:void(window.open('" &amp; Parameters!MoveOutDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-10,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-10,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-Out Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"
+ )
+ 
+ ,"")</Hyperlink>
+                          </Action>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>Solid</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Sum(Fields!Month3.Value)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox57">
+                          <rd:DefaultName>textbox57</rd:DefaultName>
+                          <Action>
+                            <Hyperlink>= IIF( RunningValue(Fields!Month4.Value,SUM,"SectionType") &gt; 0,
+
+IIF( Fields!SectionType.Value = "Move Ins by Lead Category",
+    "javascript:void(window.open('" &amp; Parameters!MoveInDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-9,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-9,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-In Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"  
+
+,
+"javascript:void(window.open('" &amp; Parameters!MoveOutDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-9,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-9,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-Out Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"
+ )
+ 
+ ,"")</Hyperlink>
+                          </Action>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>Solid</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Sum(Fields!Month4.Value)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox58">
+                          <rd:DefaultName>textbox58</rd:DefaultName>
+                          <Action>
+                            <Hyperlink>= IIF( RunningValue(Fields!Month5.Value,SUM,"SectionType") &gt; 0,
+
+IIF( Fields!SectionType.Value = "Move Ins by Lead Category",
+    "javascript:void(window.open('" &amp; Parameters!MoveInDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-8,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-8,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-In Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"  
+
+,
+"javascript:void(window.open('" &amp; Parameters!MoveOutDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-8,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-8,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-Out Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"
+ )
+ 
+ ,"")</Hyperlink>
+                          </Action>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>Solid</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Sum(Fields!Month5.Value)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox59">
+                          <rd:DefaultName>textbox59</rd:DefaultName>
+                          <Action>
+                            <Hyperlink>= IIF( RunningValue(Fields!Month6.Value,SUM,"SectionType") &gt; 0,
+
+IIF( Fields!SectionType.Value = "Move Ins by Lead Category",
+    "javascript:void(window.open('" &amp; Parameters!MoveInDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-7,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-7,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-In Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"  
+
+,
+"javascript:void(window.open('" &amp; Parameters!MoveOutDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-7,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-7,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-Out Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"
+ )
+ 
+ ,"")</Hyperlink>
+                          </Action>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>Solid</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Sum(Fields!Month6.Value)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox60">
+                          <rd:DefaultName>textbox60</rd:DefaultName>
+                          <Action>
+                            <Hyperlink>= IIF( RunningValue(Fields!Month7.Value,SUM,"SectionType") &gt; 0,
+
+IIF( Fields!SectionType.Value = "Move Ins by Lead Category",
+    "javascript:void(window.open('" &amp; Parameters!MoveInDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-6,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-6,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-In Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"  
+
+,
+"javascript:void(window.open('" &amp; Parameters!MoveOutDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-6,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-6,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-Out Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"
+ )
+ 
+ ,"")</Hyperlink>
+                          </Action>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>Solid</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Sum(Fields!Month7.Value)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox61">
+                          <rd:DefaultName>textbox61</rd:DefaultName>
+                          <Action>
+                            <Hyperlink>= IIF( RunningValue(Fields!Month8.Value,SUM,"SectionType") &gt; 0,
+
+IIF( Fields!SectionType.Value = "Move Ins by Lead Category",
+    "javascript:void(window.open('" &amp; Parameters!MoveInDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-5,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-5,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-In Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"  
+
+,
+"javascript:void(window.open('" &amp; Parameters!MoveOutDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-5,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-5,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-Out Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"
+ )
+ 
+ ,"")</Hyperlink>
+                          </Action>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>Solid</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=SUM(Fields!Month8.Value)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox62">
+                          <rd:DefaultName>textbox62</rd:DefaultName>
+                          <Action>
+                            <Hyperlink>= IIF( RunningValue(Fields!Month9.Value,SUM,"SectionType") &gt; 0,
+
+IIF( Fields!SectionType.Value = "Move Ins by Lead Category",
+    "javascript:void(window.open('" &amp; Parameters!MoveInDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-4,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-4,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-In Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"  
+
+,
+"javascript:void(window.open('" &amp; Parameters!MoveOutDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-4,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-4,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-Out Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"
+ )
+ 
+ ,"")</Hyperlink>
+                          </Action>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>Solid</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Sum(Fields!Month9.Value)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox63">
+                          <rd:DefaultName>textbox63</rd:DefaultName>
+                          <Action>
+                            <Hyperlink>= IIF( RunningValue(Fields!Month10.Value,SUM,"SectionType") &gt; 0,
+
+IIF( Fields!SectionType.Value = "Move Ins by Lead Category",
+    "javascript:void(window.open('" &amp; Parameters!MoveInDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-3,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-3,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-In Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"  
+
+,
+"javascript:void(window.open('" &amp; Parameters!MoveOutDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-3,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-3,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-Out Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"
+ )
+ 
+ ,"")</Hyperlink>
+                          </Action>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>Solid</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Sum(Fields!Month10.Value)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox64">
+                          <rd:DefaultName>textbox64</rd:DefaultName>
+                          <Action>
+                            <Hyperlink>= IIF( RunningValue(Fields!Month11.Value,SUM,"SectionType") &gt; 0,
+
+IIF( Fields!SectionType.Value = "Move Ins by Lead Category",
+    "javascript:void(window.open('" &amp; Parameters!MoveInDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-2,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-2,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-In Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"  
+
+,
+"javascript:void(window.open('" &amp; Parameters!MoveOutDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-2,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-2,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-Out Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"
+ )
+ 
+ ,"")</Hyperlink>
+                          </Action>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>Solid</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Sum(Fields!Month11.Value)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox79">
+                          <rd:DefaultName>textbox79</rd:DefaultName>
+                          <Action>
+                            <Hyperlink>= IIF( RunningValue(Fields!Month12.Value,SUM,"SectionType") &gt; 0,
+
+IIF( Fields!SectionType.Value = "Move Ins by Lead Category",
+    "javascript:void(window.open('" &amp; Parameters!MoveInDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-1,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-1,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-In Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"  
+
+,
+"javascript:void(window.open('" &amp; Parameters!MoveOutDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-1,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, DateADD("M",-1,Parameters!AsOfMonth.Value))),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-Out Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"
+ )
+ 
+ ,"")</Hyperlink>
+                          </Action>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>Solid</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Sum(Fields!Month12.Value)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox80">
+                          <rd:DefaultName>textbox80</rd:DefaultName>
+                          <Action>
+                            <Hyperlink>= IIF( RunningValue(Fields!Month13.Value,SUM,"SectionType") &gt; 0,
+
+IIF( Fields!SectionType.Value = "Move Ins by Lead Category",
+    "javascript:void(window.open('" &amp; Parameters!MoveInDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("m",0,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1,  Parameters!AsOfMonth.Value)),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-In Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"  
+
+,
+"javascript:void(window.open('" &amp; Parameters!MoveOutDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("m",0,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1,Parameters!AsOfMonth.Value)),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-Out Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"
+ )
+ 
+ ,"")</Hyperlink>
+                          </Action>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>Solid</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=Sum(Fields!Month13.Value)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox81">
+                          <rd:DefaultName>textbox81</rd:DefaultName>
+                          <Action>
+                            <Hyperlink>= IIF( RunningValue(Fields!Total.Value,SUM,"SectionType") &gt; 0,
+
+IIF( Fields!SectionType.Value = "Move Ins by Lead Category",
+    "javascript:void(window.open('" &amp; Parameters!MoveInDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-12,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1, Parameters!AsOfMonth.Value)),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-In Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"  
+
+,
+"javascript:void(window.open('" &amp; Parameters!MoveOutDrill.Value &amp; "&amp;phMy=" &amp; IIF(Parameters!ReportFor.Value = "Consolidated", REPLACE(REPLACE(Parameters!Prop.Value,"'",""),",","^"),Fields!Pcode.Value)&amp; 
+"&amp;dat1=" &amp; Format(DateADD("M",-12,Parameters!AsOfMonth.Value),"MM/dd/yyyy") &amp;
+"&amp;dat2=" &amp; Format(DateADD("d",-1,DateAdd("m", 1,Parameters!AsOfMonth.Value)),"MM/dd/yyyy")  &amp;
+ "&amp;bActual=Actual&amp;CareLvl=&amp;sortKey=Move-Out Date&amp;SumBy=Community&amp;DisplayRates=Yes" &amp; "'))"
+ )
+ 
+ ,"")</Hyperlink>
+                          </Action>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>Solid</Top>
+                              <Bottom>Solid</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value>=SUM(Fields!Month2.Value+Fields!Month3.Value+Fields!Month4.Value+Fields!Month5.Value+Fields!Month6.Value+Fields!Month7.Value+Fields!Month8.Value+Fields!Month9.Value+Fields!Month10.Value+Fields!Month11.Value+Fields!Month12.Value+Fields!Month13.Value)</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                  </TableCells>
+                  <Height>0.16in</Height>
+                </TableRow>
+                <TableRow>
+                  <Visibility>
+                    <Hidden>= Parameters!ReportFor.Value = "None"</Hidden>
+                  </Visibility>
+                  <TableCells>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox4">
+                          <rd:DefaultName>textbox4</rd:DefaultName>
+                          <Style>
+                            <BorderStyle>
+                              <Top>None</Top>
+                              <Bottom>None</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Left</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value />
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox7">
+                          <rd:DefaultName>textbox7</rd:DefaultName>
+                          <Style>
+                            <BorderStyle>
+                              <Top>None</Top>
+                              <Bottom>None</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Left</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value />
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox9">
+                          <rd:DefaultName>textbox9</rd:DefaultName>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>None</Top>
+                              <Bottom>None</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value />
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox14">
+                          <rd:DefaultName>textbox14</rd:DefaultName>
+                          <Style>
+                            <BorderStyle>
+                              <Top>None</Top>
+                              <Bottom>None</Bottom>
+                            </BorderStyle>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value />
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox11">
+                          <rd:DefaultName>textbox11</rd:DefaultName>
+                          <Style>
+                            <BorderStyle>
+                              <Top>None</Top>
+                              <Bottom>None</Bottom>
+                            </BorderStyle>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value />
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox12">
+                          <rd:DefaultName>textbox12</rd:DefaultName>
+                          <Style>
+                            <BorderStyle>
+                              <Top>None</Top>
+                              <Bottom>None</Bottom>
+                            </BorderStyle>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value />
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox15">
+                          <rd:DefaultName>textbox15</rd:DefaultName>
+                          <Style>
+                            <BorderStyle>
+                              <Top>None</Top>
+                              <Bottom>None</Bottom>
+                            </BorderStyle>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value />
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox17">
+                          <rd:DefaultName>textbox17</rd:DefaultName>
+                          <Style>
+                            <BorderStyle>
+                              <Top>None</Top>
+                              <Bottom>None</Bottom>
+                            </BorderStyle>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value />
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox20">
+                          <rd:DefaultName>textbox20</rd:DefaultName>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>None</Top>
+                              <Bottom>None</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value />
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox21">
+                          <rd:DefaultName>textbox21</rd:DefaultName>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>None</Top>
+                              <Bottom>None</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value />
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox23">
+                          <rd:DefaultName>textbox23</rd:DefaultName>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>None</Top>
+                              <Bottom>None</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value />
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox24">
+                          <rd:DefaultName>textbox24</rd:DefaultName>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>None</Top>
+                              <Bottom>None</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value />
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox26">
+                          <rd:DefaultName>textbox26</rd:DefaultName>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>None</Top>
+                              <Bottom>None</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value />
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox27">
+                          <rd:DefaultName>textbox27</rd:DefaultName>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>None</Top>
+                              <Bottom>None</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value />
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="textbox29">
+                          <rd:DefaultName>textbox29</rd:DefaultName>
+                          <Style>
+                            <Color>Blue</Color>
+                            <BorderStyle>
+                              <Top>None</Top>
+                              <Bottom>None</Bottom>
+                            </BorderStyle>
+                            <FontFamily>Tahoma</FontFamily>
+                            <FontSize>7pt</FontSize>
+                            <FontWeight>700</FontWeight>
+                            <TextAlign>Right</TextAlign>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                          <CanGrow>true</CanGrow>
+                          <Value />
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                  </TableCells>
+                  <Height>0.25in</Height>
+                </TableRow>
+              </TableRows>
+            </Footer>
+          </TableGroup>
+        </TableGroups>
+        <Width>10.44887in</Width>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Visibility>
+                <Hidden>= Parameters!ReportFor.Value = "None"</Hidden>
+              </Visibility>
+              <TableCells>
+                <TableCell>
+                  <ColSpan>2</ColSpan>
+                  <ReportItems>
+                    <Textbox Name="Description">
+                      <rd:DefaultName>Description</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <TextAlign>Left</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>=Fields!Description.Value</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="Month2">
+                      <rd:DefaultName>Month2</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <TextAlign>Right</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>=Fields!Month2.Value</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="Month3">
+                      <rd:DefaultName>Month3</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <TextAlign>Right</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>=Fields!Month3.Value</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="Month4">
+                      <rd:DefaultName>Month4</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <TextAlign>Right</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>=Fields!Month4.Value</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="Month5">
+                      <rd:DefaultName>Month5</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <TextAlign>Right</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>=Fields!Month5.Value</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="Month6">
+                      <rd:DefaultName>Month6</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <TextAlign>Right</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>=Fields!Month6.Value</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="Month7">
+                      <rd:DefaultName>Month7</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <TextAlign>Right</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>=Fields!Month7.Value</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="Month8">
+                      <rd:DefaultName>Month8</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <TextAlign>Right</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>=Fields!Month8.Value</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="Month9">
+                      <rd:DefaultName>Month9</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <TextAlign>Right</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>=Fields!Month9.Value</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="Month10">
+                      <rd:DefaultName>Month10</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <TextAlign>Right</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>=Fields!Month10.Value</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="Month11">
+                      <rd:DefaultName>Month11</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <TextAlign>Right</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>=Fields!Month11.Value</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="Month12">
+                      <rd:DefaultName>Month12</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <TextAlign>Right</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>=Fields!Month12.Value</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="Month13">
+                      <rd:DefaultName>Month13</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <TextAlign>Right</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>=Fields!Month13.Value</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="textbox44">
+                      <rd:DefaultName>textbox44</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <TextAlign>Right</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>=Fields!Month2.Value+Fields!Month3.Value+Fields!Month4.Value+Fields!Month5.Value+Fields!Month6.Value+Fields!Month7.Value+Fields!Month8.Value+Fields!Month9.Value+Fields!Month10.Value+Fields!Month11.Value+Fields!Month12.Value+Fields!Month13.Value</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+              <Height>0.16in</Height>
+            </TableRow>
+          </TableRows>
+          <Sorting>
+            <SortBy>
+              <SortExpression>=Fields!PropName.Value</SortExpression>
+              <Direction>Ascending</Direction>
+            </SortBy>
+          </Sorting>
+        </Details>
+        <Header>
+          <TableRows>
+            <TableRow>
+              <Visibility>
+                <Hidden>= IIF( LEN(Parameters!Prop.Value) =0,"", IIF( Parameters!ReportFor.Value = "Consolidated"
+      , REPLACE(Parameters!Prop.Value, "^",", ")
+      ,IIF(Parameters!Prop.Value = "" 
+           , IIF( Instr(Parameters!Prop.Value, ",") &gt; 0 , REPLACE(Parameters!Prop.Value, "^", ", "), Fields!PropName.Value)
+           ,Fields!PropName.Value) ) ) = ""</Hidden>
+              </Visibility>
+              <TableCells>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="textbox112">
+                      <rd:DefaultName>textbox112</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <FontWeight>700</FontWeight>
+                        <TextAlign>Left</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>="Community: "</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ColSpan>14</ColSpan>
+                  <ReportItems>
+                    <Textbox Name="textbox113">
+                      <rd:DefaultName>textbox113</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <TextAlign>Left</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>=  IIF( Parameters!ReportFor.Value = "Consolidated"
+      , REPLACE(Parameters!Prop.Value, "^",", ")
+      ,IIF(Parameters!Prop.Value = "" 
+           , IIF( Instr(Parameters!Prop.Value, ",") &gt; 0 , REPLACE(Parameters!Prop.Value, "^", ", "), Fields!PropName.Value)
+           ,Fields!PropName.Value) )</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+              <Height>0.16in</Height>
+            </TableRow>
+            <TableRow>
+              <Visibility>
+                <Hidden>=IIF(Parameters!ReportFor.Value = "Consolidated",TRUE,FALSE)</Hidden>
+              </Visibility>
+              <TableCells>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="textbox130">
+                      <rd:DefaultName>textbox130</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <FontWeight>700</FontWeight>
+                        <TextAlign>Left</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>="As Of Month: "</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ColSpan>14</ColSpan>
+                  <ReportItems>
+                    <Textbox Name="textbox131">
+                      <rd:DefaultName>textbox131</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <TextAlign>Left</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>=Parameters!AsOfMonth.Value
+'Left(MonthName(Month(DATEADD("m", -11 , Parameters!AsOfMonth.Value)),TRUE) ,3)+"-"+Right(YEAR(DATEADD("m", -11 , Parameters!AsOfMonth.Value)) ,2)</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+              <Height>0.16in</Height>
+            </TableRow>
+            <TableRow>
+              <Visibility>
+                <Hidden>=Parameters!ReportFor.Value = "Unconsolidated" or Parameters!ReportFor.Value = "None"</Hidden>
+              </Visibility>
+              <TableCells>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="textbox47">
+                      <rd:DefaultName>textbox47</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <FontWeight>700</FontWeight>
+                        <TextAlign>Left</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>="Month From: "</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ColSpan>14</ColSpan>
+                  <ReportItems>
+                    <Textbox Name="textbox48">
+                      <rd:DefaultName>textbox48</rd:DefaultName>
+                      <Style>
+                        <FontFamily>Tahoma</FontFamily>
+                        <FontSize>7pt</FontSize>
+                        <TextAlign>Left</TextAlign>
+                        <PaddingLeft>1pt</PaddingLeft>
+                        <PaddingRight>1pt</PaddingRight>
+                        <PaddingTop>1pt</PaddingTop>
+                        <PaddingBottom>1pt</PaddingBottom>
+                      </Style>
+                      <CanGrow>true</CanGrow>
+                      <Value>=Left(MonthName(Month(DateAdd("m",-11,Parameters!AsOfMonth.Value)),true),3)+"-"+Right(DateAdd("m",-11,Parameters!AsOfMonth.Value),2)+
+  " To " + Left(MonthName(month(Parameters!AsOfMonth.Value),true),3)+"-"+Right(Parameters!AsOfMonth.Value,2)</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+              <Height>0.16in</Height>
+            </TableRow>
+          </TableRows>
+          <RepeatOnNewPage>true</RepeatOnNewPage>
+        </Header>
+        <TableColumns>
+          <TableColumn>
+            <Width>0.69in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>0.76442in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>0.58573in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>0.67508in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>0.67508in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>0.67508in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>0.67508in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>0.67508in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>0.67508in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>0.67508in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>0.67508in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>0.67508in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>0.67508in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>0.67508in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>0.98284in</Width>
+          </TableColumn>
+        </TableColumns>
+        <Footer>
+          <TableRows>
+            <TableRow>
+              <Visibility>
+                <Hidden>=Parameters!ReportFor.Value &lt;&gt; "None"</Hidden>
+              </Visibility>
+              <TableCells>
+                <TableCell>
+                  <ColSpan>15</ColSpan>
+                  <ReportItems>
+                    <Subreport Name="subreport1">
+                      <Parameters>
+                        <Parameter Name="MoveInDrill">
+                          <Value>=Parameters!MoveInDrill.Value</Value>
+                        </Parameter>
+                        <Parameter Name="MoveOutDrill">
+                          <Value>=Parameters!MoveOutDrill.Value</Value>
+                        </Parameter>
+                        <Parameter Name="AsOfMonth">
+                          <Value>=Parameters!AsOfMonth.Value</Value>
+                        </Parameter>
+                        <Parameter Name="ReportFor">
+                          <Value>=Parameters!ReportFor.Value</Value>
+                        </Parameter>
+                        <Parameter Name="Prop">
+                          <Value>=Parameters!Prop.Value</Value>
+                        </Parameter>
+                      </Parameters>
+                      <ReportName>rs_SeniorMoveInMoveOutAnalysis_Portfolio</ReportName>
+                    </Subreport>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+              <Height>0.16in</Height>
+            </TableRow>
+          </TableRows>
+        </Footer>
+      </Table>
+    </ReportItems>
+    <Height>1.69in</Height>
+  </Body>
+  <Language>en-US</Language>
+  <PageFooter>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <ReportItems>
+      <Textbox Name="textbox5">
+        <rd:DefaultName>textbox5</rd:DefaultName>
+        <Visibility>
+          <Hidden>= IIF(TRIM(Parameters!ReportFor.Value) = "None", IIF( Len(Parameters!Prop.Value)&gt;90 OR Parameters!Prop.Value Is Nothing 
+OR Parameters!Prop.Value = ""  ,TRUE,FALSE),FALSE)</Hidden>
+        </Visibility>
+        <Width>7.33333in</Width>
+        <Style>
+          <FontFamily>Tahoma</FontFamily>
+          <FontSize>6.5pt</FontSize>
+          <Format>D</Format>
+          <TextAlign>Right</TextAlign>
+          <PaddingLeft>1pt</PaddingLeft>
+          <PaddingRight>1pt</PaddingRight>
+          <PaddingTop>1pt</PaddingTop>
+          <PaddingBottom>1pt</PaddingBottom>
+        </Style>
+        <ZIndex>1</ZIndex>
+        <CanGrow>true</CanGrow>
+        <Left>3.03125in</Left>
+        <Height>0.16667in</Height>
+        <Value>=Globals!ExecutionTime</Value>
+      </Textbox>
+      <Textbox Name="textbox3">
+        <rd:DefaultName>textbox3</rd:DefaultName>
+        <Width>3.04166in</Width>
+        <Style>
+          <FontFamily>tahoma</FontFamily>
+          <FontSize>7pt</FontSize>
+          <TextAlign>Left</TextAlign>
+          <PaddingLeft>1pt</PaddingLeft>
+          <PaddingRight>1pt</PaddingRight>
+          <PaddingTop>1pt</PaddingTop>
+          <PaddingBottom>1pt</PaddingBottom>
+        </Style>
+        <CanGrow>true</CanGrow>
+        <Left>0.01042in</Left>
+        <Height>0.16in</Height>
+        <Value>=IIF(Globals!PageNumber =1, "", "Move-In and Move-Out Analysis Report")</Value>
+      </Textbox>
+    </ReportItems>
+    <Height>0.18083in</Height>
+    <PrintOnLastPage>true</PrintOnLastPage>
+  </PageFooter>
+  <TopMargin>0.25in</TopMargin>
+  <PageHeight>8.5in</PageHeight>
+</Report>

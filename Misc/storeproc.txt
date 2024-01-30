@@ -1,0 +1,516 @@
+	CREATE PROCEDURE [SeniorOccupancyDetails]                                                         
+   (  
+   @hprop                AS VARCHAR(6000)    
+    ,@BOM                 AS DATETIME    
+    ,@EOM                 AS DATETIME    
+    ,@flag                AS INTEGER    
+    ,@ShowSeccondResident CHAR(3)     
+    ,@Type                VARCHAR(10) 
+  )
+  AS BEGIN
+ /*
+  drop table  #tmpOccupancy1
+  drop table  #tmpOccupancy
+  drop table  #tmpOccupancyDetail
+   drop table  #TempTbl
+   drop table #tbl
+  Declare @hprop                AS VARCHAR(6000)    
+   ,@BOM                 AS DATETIME    
+   ,@EOM                 AS DATETIME    
+   ,@flag                AS INTEGER    
+   ,@ShowSeccondResident CHAR(3)     
+   ,@Type                VARCHAR(10) 
+ SET @hprop                ='sh10'
+ SET  @BOM                 ='08/01/2012'
+ SET  @EOM                 ='08/31/2012'
+ SET  @flag                =1
+ SET  @ShowSeccondResident = ''    
+ SET  @Type                 ='Report'    
+ */
+ Create TABLE  #tmpOccupancyDetail (    
+ Propertyid          NUMERIC    
+ ,Propertyname       VARCHAR( 266 )    
+ ,Property           VARCHAR( 266 )    
+ ,Propcode           VARCHAR( 20 )    
+ ,Unitid             NUMERIC    
+ ,Unitcode           VARCHAR( 15 )    
+ ,Unittypeid         NUMERIC    
+ ,Unittype           VARCHAR( 100 )    
+ ,Carelevelcode      VARCHAR( 10 )    
+ ,Unitcapacity       NUMERIC    
+ ,Unitbudgetcapacity NUMERIC    
+ ,Unitsqft           NUMERIC( 18, 2 )    
+ ,Unitwaitlistflag   BIT    
+ ,Unitexcludeflag    BIT UNIQUE(Propertyid,Unitid) )    
+  /* @flag ='1' then 'Physical Unit Based Occupancy'                               
+       @flag ='2' then 'Physical Lease Based Occupancy'                              
+       @flag ='3' then 'Physical Unit Based Occupancy (disregarding capacity)'                              
+       @flag ='4' then 'Financial Unit Based Occupancy'                             
+       @flag ='5' then 'Financial Lease Based Occupancy'                              
+       @flag ='6' then 'Financial Unit Based Occupancy (disregarding capacity)'                            
+       and @flag =0  for both Physical and financial occupancies */    
+        INSERT INTO #tmpOccupancyDetail    
+        SELECT    
+          P.Propertyid,    
+          Ltrim( Rtrim( P.Propertyname ) ) + ' (' + Ltrim( Rtrim( P.Propertycode ) ) + ')',    
+          P.Property,    
+          Ltrim( Rtrim( P.Propertycode ) ),    
+          U.Hmy,    
+          U.Scode,    
+          Ut.Hmy,    
+          Isnull( Ut.Sdesc, Ut.Scode ),    
+          Su.Carelevelcode,    
+          Su.Unitcapacitycount,    
+          Su.Unitbudgetcount,    
+          U.Dsqft,    
+          Su.Unitwaitlistflag,    
+          U.Exclude    
+        FROM       Dbo.Seniorpropertyfunction( NULL, @hprop ) P    
+        INNER JOIN Unit U ON U.Hproperty = P.Propertyid   
+        INNER JOIN Seniorunit Su ON Su.Unitid = U.Hmy    
+        INNER JOIN Unittype Ut ON Ut.Hmy = U.Hunittype    
+        INNER JOIN Listoption C ON Su.Carelevelcode = C.Listoptioncode    
+                                   AND C.Listname = 'CareLevel'    
+       Create table #tmpOccupancy1 (    
+         Hmy                      NUMERIC( 18, 0 ) IDENTITY(1, 1)    
+         ,Title                   VARCHAR( 100 )    
+         ,Propertyid              NUMERIC    
+         ,Unitid                  NUMERIC    
+         ,Residentid              NUMERIC    
+         ,Residentname            VARCHAR( 200 )    
+         ,Dtmovein                DATETIME    
+         ,Dtmoveout               DATETIME    
+         ,Serviceinstancefromdate DATETIME    
+         ,Serviceinstancetodate   DATETIME    
+         ,Privacylevelcode        VARCHAR( 10 )    
+         ,Rescarelvlcode          VARCHAR( 10 )    
+         ,Contracttypecode        VARCHAR( 10 )    
+         ,Residentstatus          NUMERIC( 18, 0 )    
+         ,Occupancy         NUMERIC( 18, 2 )    
+         ,Beliminate              BIT    
+         ,Fromdate                DATETIME    
+         ,Todate                  DATETIME    
+         ,Residenthistorycode     VARCHAR( 10 )    
+         ,Residenthistoryid       NUMERIC  UNIQUE (hmy)
+         ,MoveInExist BIT)    
+       Create table #tmpOccupancy (    
+         Hmy                      NUMERIC( 18, 0 ) IDENTITY(1, 1)    
+         ,Title                   VARCHAR( 100 )    
+         ,Propertyid              NUMERIC    
+         ,Unitid                  NUMERIC    
+         ,Residentid              NUMERIC    
+         ,Residentname            VARCHAR( 200 )    
+         ,Dtmovein                DATETIME    
+         ,Dtmoveout               DATETIME    
+         ,Serviceinstancefromdate DATETIME    
+         ,Serviceinstancetodate   DATETIME    
+         ,Privacylevelcode        VARCHAR( 10 )    
+         ,Rescarelvlcode          VARCHAR( 10 )    
+         ,Contracttypecode        VARCHAR( 10 )    
+         ,Residentstatus          NUMERIC( 18, 0 )    
+         ,Occupancy               NUMERIC( 18, 2 )    
+         ,Beliminate              BIT    
+         ,Fromdate                DATETIME    
+         ,Todate                  DATETIME    
+         ,Residenthistorycode     VARCHAR( 10 )    
+         ,Residenthistoryid       NUMERIC  UNIQUE (hmy)
+         ,MoveInExist BIT)    
+        INSERT INTO #tmpOccupancy    
+        (    
+          Title    
+          ,Propertyid    
+          ,Unitid    
+          ,Residentid    
+          ,Residentname    
+          ,Dtmovein    
+          ,Dtmoveout    
+          ,Serviceinstancefromdate    
+          ,Serviceinstancetodate    
+          ,Privacylevelcode    
+          ,Rescarelvlcode    
+          ,Contracttypecode    
+          ,Residentstatus    
+          ,Occupancy    
+          ,Beliminate    
+          ,Fromdate    
+          ,Todate    
+          ,Residenthistorycode    
+          ,Residenthistoryid
+          ,MoveInExist     
+        ) 
+       /* Reports will consider resident history for Physical Occupancy*/    
+       SELECT    
+         'Physical Occupancy',    
+         P.Propertyid                                                                                                                                              Phmy,    
+         Srh.Unitid,    
+         T.Hmyperson                                                                                                                                               Residentid,    
+         Rtrim( Ltrim( Isnull( T.Slastname, '' ) ) ) + ', ' + Rtrim( Ltrim( Isnull( T.Sfirstname, '' ) ) ) + ' (' + Rtrim( Ltrim( Isnull( T.Scode, '' ) ) ) + ') ' Residentname,    
+         T.Dtmovein,    
+         CASE    
+            WHEN T.Istatus = 4 THEN NULL    
+            ELSE T.Dtmoveout    
+         END,    
+         NULL,    
+         NULL,    
+         Srh.Privacylevelcode,    
+         Srh.Carelevelcode,    
+         Srh.Contracttypecode,    
+         Srh.Residentstatuscode,    
+         Cast( Lv.Listoptionvalue AS NUMERIC( 3, 2 ))                                                                                                              Occ,    
+         1,    
+         CONVERT( DATETIME, CONVERT(VARCHAR(10), Srh.Residenthistorydate,121), 101 ),    
+         NULL,    
+         Residenthistorycode,    
+         MAX(Residenthistoryid)    ,
+         0
+       FROM       Dbo.Seniorpropertyfunction( NULL, @hprop ) P    
+       INNER JOIN Tenant T ON T.Hproperty = P.Propertyid    
+                              AND @flag IN ( 0, 1, 2, 3 )    
+                              AND @Type = 'Report' 
+       INNER JOIN Seniorresident Sr ON T.Hmyperson = Sr.Residentid    
+       INNER JOIN Seniorresidenthistory Srh ON Srh.Residentid = T.Hmyperson    
+                                               AND Srh.Residentstatuscode IN ( 0, 4, 1, 11 )    
+ 	AND (Case when t.istatus = 4 then @BOM ELSE isnull(T.dtMoveout,'01/01/2100') END )  >= @BOM      
+       INNER JOIN  Listoption L1 ON ( Srh.Carelevelcode = L1.Listoptioncode    
+                                     AND L1.Listname = 'CareLevel' )    
+       INNER JOIN  Listoption L2 ON ( Srh.Privacylevelcode = L2.Listoptioncode    
+                                     AND L2.Listname = 'PrivacyLevel' )    
+        INNER JOIN  Listoptionvalue Lv ON Lv.Listname = 'PrivacyLevel'    
+                                         AND Lv.Listoptioncode = L2.Listoptioncode    
+ WHERE 1=1 
+ 	AND  Srh.Residenthistorycode IN ( 'MIN', 'NOT', 'CNT', 'OUT',    
+ 			'QIK', 'SRV', 'LCM', 'LCN', 'CVT' ,
+ 			'LED', 'LST' 
+ )  
+ 			AND 
+ 	CONVERT( DATETIME, CONVERT(VARCHAR(10), Srh.Residenthistorydate,121), 101 ) <= CONVERT( DATETIME, CONVERT(varchar(10),@EOM,121), 101 )    
+ GROUP BY
+ 	 P.Propertyid ,                                                                                                                                              
+         Srh.Unitid,    
+         T.Hmyperson    ,                                                                                                                                           
+         Rtrim( Ltrim( Isnull( T.Slastname, '' ) ) ) + ', ' + Rtrim( Ltrim( Isnull( T.Sfirstname, '' ) ) ) + ' (' + Rtrim( Ltrim( Isnull( T.Scode, '' ) ) ) + ') ' ,
+         T.Dtmovein,    
+         CASE    
+            WHEN T.Istatus = 4 THEN NULL    
+            ELSE T.Dtmoveout    
+         END,    
+         Srh.Privacylevelcode,    
+         Srh.Carelevelcode,    
+         Srh.Contracttypecode,    
+         Srh.Residentstatuscode,    
+         Cast( Lv.Listoptionvalue AS NUMERIC( 3, 2 ))                                                                                                              ,    
+         CONVERT( DATETIME, CONVERT(VARCHAR(10), Srh.Residenthistorydate,121), 101 ),    
+         Residenthistorycode 
+   UNION ALL    
+       SELECT    
+         'Financial Occupancy',    
+         P.Propertyid                                                                                                                                              Phmy,    
+         Si.Unitid,    
+         T.Hmyperson                                                                                                                                               Residentid,    
+         Rtrim( Ltrim( Isnull( T.Slastname, '' ) ) ) + ', ' + Rtrim( Ltrim( Isnull( T.Sfirstname, '' ) ) ) + ' (' + Rtrim( Ltrim( Isnull( T.Scode, '' ) ) ) + ') ' Residentname,    
+         T.Dtmovein,    
+         CASE    
+            WHEN T.Istatus = 4 THEN NULL    
+            ELSE T.Dtmoveout    
+         END,    
+         Si.Serviceinstancefromdate,    
+         Si.Serviceinstancetodate,    
+         Si.Privacylevelcode,    
+         Si.Carelevelcode,    
+         Si.Contracttypecode,    
+         T.Istatus,    
+         Cast( Lv.Listoptionvalue AS NUMERIC( 3, 2 ))                                                                                                              Occ,    
+         1,    
+         Si.Serviceinstancefromdate,    
+         Si.Serviceinstancetodate,    
+         NULL,    
+         0    ,
+         0
+       FROM       Dbo.Seniorpropertyfunction( NULL, @hprop ) P    
+       INNER JOIN Tenant T ON T.Hproperty = P.Propertyid    
+                              AND @flag IN ( 0, 4, 5, 6 )    
+       INNER JOIN Serviceinstance Si ON ( T.Hmyperson = Si.Residentid )    
+       INNER JOIN Service S ON ( Si.Serviceid = S.Serviceid    
+                                 AND S.Serviceclassid = 1 )    
+       INNER JOIN Seniorresident Rs ON ( T.Hmyperson = Rs.Residentid )    
+       INNER JOIN  Listoption L1 ON ( Si.Carelevelcode = L1.Listoptioncode    
+                                     AND L1.Listname = 'CareLevel' )    
+       INNER JOIN  Listoption L2 ON ( Si.Privacylevelcode = L2.Listoptioncode    
+                 AND L2.Listname = 'PrivacyLevel' )    
+       INNER JOIN  Listoptionvalue Lv ON Lv.Listname = 'PrivacyLevel'    
+                                         AND Lv.Listoptioncode = L2.Listoptioncode    
+       WHERE      Si.Serviceinstanceactiveflag <> 0    
+              AND Isnull( Si.Serviceinstancetodate, @EOM ) > = Si.Serviceinstancefromdate    
+              AND Si.Serviceinstancefromdate <= @EOM    
+              AND @BOM <= Isnull( Si.Serviceinstancetodate, @EOM )    
+       ORDER  BY    
+         3,    
+         4,    
+         5,    
+         19,    
+         16    
+ UPDATE #tmpOccupancy
+ Set Residenthistorycode='CMO'
+ WHERE Residenthistorycode='CVT'
+ Update #tmpOccupancy
+ SET MoveInExist = 1
+ where residentid In (Select residentid from #tmpOccupancy where residenthistorycode = 'MIN' )
+ SELECT ResidenthistoryId ,tmp.ResidentId into #tmpOcc from #tmpOccupancy tmp
+ INNER JOIN(
+ SELECT residentid,FromDate from #tmpOccupancy 
+ WHERE 1=1
+ GROUP BY residentid,FromDate
+ HAVING COUNT(residentid)>1 ) t on t.ResidentId = tmp.ResidentiD and t.FromDate = tmp.Fromdate 
+ DELETE FROM #tmpOcc
+ where ResidenthistoryId IN (SELECT MAX(ResidenthistoryId) FROM #tmpOcc
+ group By Residentid
+ )
+ DELETE FROM #tmpOccupancy
+ WHERE ResidenthistoryId in (
+ SELECT ResidenthistoryId from #tmpOcc
+ )
+ IF @flag IN ( 0, 1, 2, 3 )    
+   BEGIN    
+ Create table #tbl
+ (ResHisId Numeric )
+ Insert into #tbl 
+ SELECT    
+               T1.Residenthistoryid    
+             FROM       #tmpOccupancy T1    
+             INNER JOIN #tmpOccupancy T2 ON T1.Hmy + 1 = T2.Hmy    
+                                            AND T1.Residentid = T2.Residentid    
+                                            AND T2.Residenthistorycode IN ( 'CNT', 'LCN' )    
+             INNER JOIN #tmpOccupancy T3 ON T3.Residenthistoryid = T2.Residenthistoryid    
+              delete from  #tmpOccupancy WHERE  Residenthistoryid IN ( Select ResHisId from #tbl)
+ 	    DELETE FROM #tmpOccupancy WHERE Residenthistorycode IN ( 'CNT', 'LCN' )
+             INSERT INTO #tmpOccupancy1    
+             (    
+               Title    
+               ,Propertyid    
+               ,Unitid    
+               ,Residentid    
+               ,Residentname    
+               ,Dtmovein    
+               ,Dtmoveout    
+               ,Serviceinstancefromdate    
+               ,Serviceinstancetodate    
+               ,Privacylevelcode    
+               ,Rescarelvlcode    
+               ,Contracttypecode    
+               ,Residentstatus    
+               ,Occupancy    
+               ,Beliminate    
+               ,Fromdate    
+               ,Residenthistorycode    
+               ,Residenthistoryid    
+               ,MoveInExist
+             )    
+             SELECT    
+               Title,    
+               Propertyid,    
+               Unitid,    
+               Residentid,    
+               Residentname,    
+               Dtmovein,    
+               Dtmoveout,    
+               Serviceinstancefromdate,    
+               Serviceinstancetodate,    
+               Privacylevelcode,    
+               Rescarelvlcode,    
+               Contracttypecode,    
+               Residentstatus,    
+               Occupancy,    
+               Beliminate,    
+               Fromdate,    
+               Residenthistorycode,    
+               Residenthistoryid    ,
+               MoveInExist
+             FROM   #tmpOccupancy    
+            Truncate TABLE #tmpOccupancy
+             INSERT INTO #tmpOccupancy    
+             (    
+               Title    
+               ,Propertyid    
+               ,Unitid    
+               ,Residentid    
+               ,Residentname    
+               ,Dtmovein    
+               ,Dtmoveout    
+               ,Serviceinstancefromdate    
+               ,Serviceinstancetodate    
+               ,Privacylevelcode    
+               ,Rescarelvlcode    
+               ,Contracttypecode    
+               ,Residentstatus    
+               ,Occupancy    
+               ,Beliminate    
+               ,Fromdate    
+               ,Residenthistorycode    
+               ,Residenthistoryid    
+               ,MoveInExist
+             )    
+             SELECT    
+               Title,    
+               Propertyid,    
+               Unitid,    
+               Residentid,    
+               Residentname,    
+               Dtmovein,    
+               Dtmoveout,    
+               Serviceinstancefromdate,    
+               Serviceinstancetodate,    
+               Privacylevelcode,    
+               Rescarelvlcode,    
+               Contracttypecode,    
+               Residentstatus,    
+               Occupancy,    
+               Beliminate,    
+               Fromdate,    
+               Residenthistorycode,    
+               Residenthistoryid    ,
+               MoveInExist
+             FROM   #tmpOccupancy1    
+             ORDER  BY    
+               Residentid,    
+               Fromdate    
+     UPDATE T1    
+              SET    T1.Todate = T1.Fromdate    
+              FROM   #tmpOccupancy T1    
+              WHERE  T1.Residentstatus = 1    
+     UPDATE T1    
+              SET    T1.Todate = Dateadd( Dd, -1, T2.Fromdate )    
+              FROM   #tmpOccupancy T1    
+                     INNER JOIN #tmpOccupancy T2 ON T1.Hmy + 1 = T2.Hmy    
+                                                    AND T1.Residentid = T2.Residentid    
+                                                    AND T1.Residentstatus <> 1    
+         END    
+ CREATE TABLE #TempTbl (    
+         Unitid   NUMERIC    
+          ,MinHmy Numeric    
+         ,Dccount NUMERIC UNIQUE(UnitId) )    
+       INSERT INTO #TempTbl     
+       SELECT    
+         T1.Unitid,    
+         Min(Hmy),    
+ 	Max( CASE WHEN @BOM BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1    ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 1, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 2, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 3, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 4, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 5, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 6, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 7, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 8, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 9, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 10, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 11, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 12, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 13, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 14, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 15, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 16, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 17, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 18, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 19, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 20, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 21, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 22, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 23, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 24, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 25, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 26, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 27, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN (Dateadd( Dd, 28, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM ) ) AND Dateadd( Dd, 28, @BOM ) <= @EOM THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 29, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM )    AND Dateadd( Dd, 29, @BOM ) <= @EOM THEN 1 ELSE 0 END ) 
+ 	+ Max( CASE WHEN Dateadd( Dd, 30, @BOM ) BETWEEN T1.Fromdate AND Isnull( T1.Todate, @eOM )    AND Dateadd( Dd, 30, @BOM ) <= @EOM THEN 1 ELSE 0 END ) Dcdaycount    
+ FROM   #tmpOccupancy T1     
+ WHERE ISNULL(todate,@EOM) BETWEEN  @BOM and @EOM    
+ GROUP  BY Unitid    
+ ORDER BY 1
+ IF @flag IN (0, 1, 2, 3 )
+ BEGIN
+ Update t
+ Set t.todate = t1.FromDate
+ From #tmpOccupancy t 
+ inner join #tmpOccupancy t1 on t.Unitid = t1.unitid and t.residentid = t1.residentid
+ and t.hmy+ 1 = t1.hmy and datediff(dd,t1.FromDate,t1.todate) =0 
+ and t1.ResidentHistoryCode ='QIK'
+ DELETE tmp  FROM #tmpOccupancy  tmp
+ Inner Join (
+ select ResidentId, UnitId,MAX(hmy)hmy  from #tmpOccupancy where  ResidentHistoryCode ='QIK' 
+ group by ResidentId, UnitId
+ )my on my.residentid = tmp.residentid and my.unitid = tmp.unitid and tmp.hmy=  my.hmy +1 AND ResidentHistoryCode NOT IN ('MIN', 'CMO')  
+ /*DELETE tmp FROM  #tmpOccupancy tmp
+ LEFT JOIN(Select DISTINCT ResidentId From #tmpOccupancy where residenthistorycode IN ('MIN')) myview on myview.ResidentID = tmp.ResidentID
+ WHERE myview.ResidentID IS NULL*/
+  DELETE From  #tmpOccupancy 
+  where Residentid Not in ( Select ResidentId From #tmpOccupancy where MoveiNExist = 1) 
+ DELETE from  #tmpOccupancy WHERE ResidentHistoryCode ='QIK'
+ END
+  SELECT
+         T.Hmy,
+         Td.Propertyid,
+         Td.Propertyname,
+         Td.Property,
+         Td.Propcode,
+         Td.Unitid,
+         Td.Unitcode,
+         Td.Carelevelcode,
+         Td.Unittypeid,
+         Td.Unittype,
+         Td.Unitcapacity,
+         Td.Unitbudgetcapacity,
+         Isnull( T.Residentid, 0 ),
+         Isnull( T.Residentname, '' ),
+         T.Dtmovein,
+         T.Dtmoveout,
+         T.Serviceinstancefromdate,
+         T.Serviceinstancetodate,
+         Isnull( T.Privacylevelcode, 'PRI' ),
+         Isnull( T.Rescarelvlcode, Td.Carelevelcode ),
+         T.Residentstatus,
+         T.Contracttypecode,
+         CASE
+            WHEN T.Privacylevelcode = 'SEC' THEN 0
+            ELSE T.Occupancy
+         END Unitbasedocc,
+         CASE
+            WHEN T.Privacylevelcode = 'SEC' THEN 0
+            ELSE
+              CASE
+                 WHEN Isnull( T.Residentid, 0 ) = 0 THEN 0
+                 ELSE 1
+              END
+         END Leasebasedocc,
+        CASE
+            WHEN T.Privacylevelcode = 'SEC' THEN 0
+            ELSE
+              CASE
+                 WHEN ISNULL(T.Residentid,0) > 0  THEN 1
+                 ELSE 0
+              END
+         END Unitbaseddcocc,
+         Td.Unitexcludeflag,
+         T.Fromdate,
+         T.Todate,
+         Dc.Dccount
+  FROM    #tmpOccupancyDetail Td
+          LEFT JOIN   #tmpOccupancy  T ON T.Propertyid = Td.Propertyid
+                                       AND T.Unitid = Td.Unitid
+ 	AND     1 = CASE
+ 	WHEN @flag IN (0, 1, 2, 3 )
+ 	AND @Type = 'report'  THEN
+ 	CASE
+ 	WHEN
+ 	(
+ 	isnull(Fromdate,'01/01/1900') <= @EOM
+ 	AND Isnull( Todate, '01/01/2100' ) >= @BOM
+ 	)
+ 	AND isnull(Fromdate,'01/01/1900') <= Isnull( Todate, '01/01/2100' ) THEN 1
+ 	ELSE 0
+ 	END
+ 	ELSE 1
+  											END
+         LEFT JOIN #TempTbl Dc ON Dc.Unitid = Td.Unitid    
+         AND @Flag IN ( 3, 6 )  
+  END

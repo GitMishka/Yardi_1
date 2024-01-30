@@ -1,0 +1,407 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <DataSources>
+    <DataSource Name="SH_SSRS_DEV_SSRSConnectionString">
+      <rd:DataSourceID>33dfb8a0-e152-4ecf-a29f-04ca95d36a2f</rd:DataSourceID>
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString>Data Source=YSIINSQLQADB\SQLQADB_2K8R2;Initial Catalog=SH_SSRS_DEV_SSRS;User ID=shssrs;Password=shssrs</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <InteractiveHeight>11in</InteractiveHeight>
+  <ReportParameters>
+    <ReportParameter Name="PropertyName">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>Report_Parameter_0</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Month">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>Report_Parameter_1</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="rptsortby">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>Report_Parameter_2</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="DetailSortBy">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>Report_Parameter_3</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Flag">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>Report_Parameter_4</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="datemask">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>Report_Parameter_5</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="rptType">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>Report_Parameter_6</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <rd:DrawGrid>true</rd:DrawGrid>
+  <InteractiveWidth>8.5in</InteractiveWidth>
+  <rd:SnapToGrid>false</rd:SnapToGrid>
+  <RightMargin>0.25in</RightMargin>
+  <LeftMargin>0.25in</LeftMargin>
+  <PageHeader>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <ReportItems>
+      <Textbox Name="textbox5">
+        <Top>0.59708in</Top>
+        <Width>4.4375in</Width>
+        <Style>
+          <FontFamily>Tahoma</FontFamily>
+          <FontSize>7pt</FontSize>
+          <PaddingLeft>1pt</PaddingLeft>
+          <PaddingRight>1pt</PaddingRight>
+          <PaddingTop>1pt</PaddingTop>
+          <PaddingBottom>1pt</PaddingBottom>
+        </Style>
+        <ZIndex>6</ZIndex>
+        <CanGrow>true</CanGrow>
+        <Height>0.16in</Height>
+        <Value>="Occupancy Type: " &amp; Parameters!Flag.Value</Value>
+      </Textbox>
+      <Textbox Name="textbox2">
+        <rd:DefaultName>textbox2</rd:DefaultName>
+        <Top>0.76042in</Top>
+        <Width>1.58333in</Width>
+        <Style>
+          <PaddingLeft>2pt</PaddingLeft>
+          <PaddingRight>2pt</PaddingRight>
+          <PaddingTop>2pt</PaddingTop>
+          <PaddingBottom>2pt</PaddingBottom>
+        </Style>
+        <ZIndex>5</ZIndex>
+        <CanGrow>true</CanGrow>
+        <Left>4.57292in</Left>
+        <Height>0.15625in</Height>
+        <Value />
+      </Textbox>
+      <Textbox Name="textbox3">
+        <Top>0.76562in</Top>
+        <Width>4.4375in</Width>
+        <Style>
+          <FontFamily>Tahoma</FontFamily>
+          <FontSize>7pt</FontSize>
+          <PaddingLeft>1pt</PaddingLeft>
+          <PaddingRight>1pt</PaddingRight>
+          <PaddingTop>1pt</PaddingTop>
+          <PaddingBottom>1pt</PaddingBottom>
+        </Style>
+        <ZIndex>4</ZIndex>
+        <CanGrow>true</CanGrow>
+        <Value>="Sort By: " &amp; Parameters!rptsortby.Value</Value>
+      </Textbox>
+      <Textbox Name="textbox4">
+        <Top>0.42189in</Top>
+        <Width>4.4375in</Width>
+        <Style>
+          <FontFamily>Tahoma</FontFamily>
+          <FontSize>7pt</FontSize>
+          <PaddingLeft>1pt</PaddingLeft>
+          <PaddingRight>1pt</PaddingRight>
+          <PaddingTop>1pt</PaddingTop>
+          <PaddingBottom>1pt</PaddingBottom>
+        </Style>
+        <ZIndex>3</ZIndex>
+        <CanGrow>true</CanGrow>
+        <Height>0.16in</Height>
+        <Value>="Date: " &amp; Parameters!Month.Value</Value>
+      </Textbox>
+      <Textbox Name="textbox7">
+        <Top>0.25522in</Top>
+        <Width>4.4375in</Width>
+        <Style>
+          <FontFamily>Tahoma</FontFamily>
+          <FontSize>7pt</FontSize>
+          <PaddingLeft>1pt</PaddingLeft>
+          <PaddingRight>1pt</PaddingRight>
+          <PaddingTop>1pt</PaddingTop>
+          <PaddingBottom>1pt</PaddingBottom>
+        </Style>
+        <ZIndex>2</ZIndex>
+        <CanGrow>true</CanGrow>
+        <Height>0.16in</Height>
+        <Value>="Community: " &amp; Parameters!PropertyName.Value</Value>
+      </Textbox>
+      <Textbox Name="textbox8">
+        <Visibility>
+          <Hidden>=IIF(Globals!PageNumber &lt;&gt; 1, True, False)</Hidden>
+        </Visibility>
+        <Top>0.00521in</Top>
+        <Width>5.5in</Width>
+        <Style>
+          <FontFamily>Tahoma</FontFamily>
+          <FontWeight>700</FontWeight>
+          <PaddingLeft>1pt</PaddingLeft>
+          <PaddingRight>1pt</PaddingRight>
+          <PaddingTop>1pt</PaddingTop>
+          <PaddingBottom>1pt</PaddingBottom>
+        </Style>
+        <ZIndex>1</ZIndex>
+        <CanGrow>true</CanGrow>
+        <Height>0.20833in</Height>
+        <Value>Occupancy Detail/Summary</Value>
+      </Textbox>
+      <Textbox Name="textbox340">
+        <Top>0.76041in</Top>
+        <Width>1.76042in</Width>
+        <Style>
+          <FontFamily>Tahoma</FontFamily>
+          <FontSize>7pt</FontSize>
+          <TextAlign>Right</TextAlign>
+          <PaddingLeft>2pt</PaddingLeft>
+          <PaddingRight>2pt</PaddingRight>
+          <PaddingTop>2pt</PaddingTop>
+          <PaddingBottom>2pt</PaddingBottom>
+        </Style>
+        <CanGrow>true</CanGrow>
+        <Left>6.21in</Left>
+        <Height>0.16in</Height>
+        <Value>="Page " &amp; Globals!PageNumber</Value>
+      </Textbox>
+    </ReportItems>
+    <Height>0.92562in</Height>
+    <PrintOnLastPage>true</PrintOnLastPage>
+  </PageHeader>
+  <BottomMargin>0.25in</BottomMargin>
+  <rd:ReportID>79073c06-83d9-44c2-93c1-3ac70b7dd5a6</rd:ReportID>
+  <DataSets>
+    <DataSet Name="rs_SeniorOccupancyDetail_DataTable1">
+      <Fields>
+        <Field Name="CommunityName">
+          <DataField>CommunityName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ResidentName">
+          <DataField>ResidentName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Unit">
+          <DataField>Unit</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="UnitType">
+          <DataField>UnitType</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Sort">
+          <DataField>Sort</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="FromDate">
+          <DataField>FromDate</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ToDate">
+          <DataField>ToDate</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ResidentDayCount">
+          <DataField>ResidentDayCount</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="UnitDayCount">
+          <DataField>UnitDayCount</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="SortKey">
+          <DataField>SortKey</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+      <Query>
+        <DataSourceName>SH_SSRS_DEV_SSRSConnectionString</DataSourceName>
+        <CommandType>StoredProcedure</CommandType>
+        <CommandText>dbo.SeniorOccupancyDetail</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <rd:DataSetInfo>
+        <rd:DataSetName>rs_SeniorOccupancyDetail</rd:DataSetName>
+        <rd:TableName>DataTable1</rd:TableName>
+        <rd:TableAdapterName>DataTable1TableAdapter</rd:TableAdapterName>
+        <rd:TableAdapterFillMethod>Fill</rd:TableAdapterFillMethod>
+        <rd:TableAdapterGetDataMethod>GetData</rd:TableAdapterGetDataMethod>
+      </rd:DataSetInfo>
+    </DataSet>
+  </DataSets>
+  <Width>8in</Width>
+  <Body>
+    <ReportItems>
+      <Table Name="table2">
+        <DataSetName>rs_SeniorOccupancyDetail_DataTable1</DataSetName>
+        <Filters>
+          <Filter>
+            <FilterExpression>=Fields!CommunityName.Value</FilterExpression>
+            <Operator>NotEqual</Operator>
+            <FilterValues>
+              <FilterValue />
+            </FilterValues>
+          </Filter>
+        </Filters>
+        <TableGroups>
+          <TableGroup>
+            <Grouping Name="table2_Group1">
+              <Label>=Fields!CommunityName.Value</Label>
+              <GroupExpressions>
+                <GroupExpression>=Fields!CommunityName.Value</GroupExpression>
+              </GroupExpressions>
+              <PageBreakAtEnd>true</PageBreakAtEnd>
+            </Grouping>
+            <Sorting>
+              <SortBy>
+                <SortExpression>=Fields!CommunityName.Value</SortExpression>
+                <Direction>Ascending</Direction>
+              </SortBy>
+            </Sorting>
+            <Header>
+              <TableRows>
+                <TableRow>
+                  <Visibility>
+                    <Hidden>=IIF(Parameters!rptType.Value = "Summary", True, False)</Hidden>
+                  </Visibility>
+                  <TableCells>
+                    <TableCell>
+                      <ColSpan>3</ColSpan>
+                      <ReportItems>
+                        <Subreport Name="subreport1">
+                          <Parameters>
+                            <Parameter Name="DetailSortBy">
+                              <Value>=Parameters!DetailSortBy.Value</Value>
+                            </Parameter>
+                            <Parameter Name="Flag">
+                              <Value>=Parameters!Flag.Value</Value>
+                            </Parameter>
+                            <Parameter Name="datemask">
+                              <Value>=Parameters!datemask.Value</Value>
+                            </Parameter>
+                          </Parameters>
+                          <ReportName>rs_SeniorIHPOccupancyDetail_Detail</ReportName>
+                          <Style>
+                            <PaddingLeft>1pt</PaddingLeft>
+                            <PaddingRight>1pt</PaddingRight>
+                            <PaddingTop>1pt</PaddingTop>
+                            <PaddingBottom>1pt</PaddingBottom>
+                          </Style>
+                        </Subreport>
+                      </ReportItems>
+                    </TableCell>
+                  </TableCells>
+                  <Height>0.16in</Height>
+                </TableRow>
+              </TableRows>
+            </Header>
+          </TableGroup>
+        </TableGroups>
+        <Width>7.88541in</Width>
+        <TableColumns>
+          <TableColumn>
+            <Width>2.62847in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>2.62847in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>2.62847in</Width>
+          </TableColumn>
+        </TableColumns>
+        <Footer>
+          <TableRows>
+            <TableRow>
+              <Visibility>
+                <Hidden>=IIF(Parameters!rptType.Value = "Detail", True, False)</Hidden>
+              </Visibility>
+              <TableCells>
+                <TableCell>
+                  <ColSpan>3</ColSpan>
+                  <ReportItems>
+                    <Subreport Name="subreport2">
+                      <Parameters>
+                        <Parameter Name="datemask">
+                          <Value>=Parameters!datemask.Value</Value>
+                        </Parameter>
+                      </Parameters>
+                      <ReportName>rs_SeniorIHPOccupancyDetail_Summary</ReportName>
+                    </Subreport>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+              <Height>0.16in</Height>
+            </TableRow>
+          </TableRows>
+        </Footer>
+      </Table>
+    </ReportItems>
+    <Height>0.32in</Height>
+  </Body>
+  <Language>en-US</Language>
+  <PageFooter>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <ReportItems>
+      <Textbox Name="textbox6">
+        <Top>0.00188in</Top>
+        <Width>2.10416in</Width>
+        <Style>
+          <PaddingLeft>2pt</PaddingLeft>
+          <PaddingRight>2pt</PaddingRight>
+          <PaddingTop>2pt</PaddingTop>
+          <PaddingBottom>2pt</PaddingBottom>
+        </Style>
+        <ZIndex>2</ZIndex>
+        <CanGrow>true</CanGrow>
+        <Left>3.5in</Left>
+        <Value />
+      </Textbox>
+      <Textbox Name="textbox1">
+        <rd:DefaultName>textbox1</rd:DefaultName>
+        <Width>3.38542in</Width>
+        <Style>
+          <FontFamily>Tahoma</FontFamily>
+          <FontSize>7pt</FontSize>
+          <PaddingLeft>1pt</PaddingLeft>
+          <PaddingRight>1pt</PaddingRight>
+          <PaddingTop>1pt</PaddingTop>
+          <PaddingBottom>1pt</PaddingBottom>
+        </Style>
+        <ZIndex>1</ZIndex>
+        <CanGrow>true</CanGrow>
+        <Value>=IIF(Globals!PageNumber = 1 ,"" ,"Occupancy Detail")</Value>
+      </Textbox>
+      <Textbox Name="textbox299">
+        <Width>2.20834in</Width>
+        <Style>
+          <FontFamily>Tahoma</FontFamily>
+          <FontSize>6.5pt</FontSize>
+          <TextAlign>Right</TextAlign>
+          <PaddingLeft>1pt</PaddingLeft>
+          <PaddingRight>1pt</PaddingRight>
+          <PaddingTop>1pt</PaddingTop>
+          <PaddingBottom>1pt</PaddingBottom>
+        </Style>
+        <CanGrow>true</CanGrow>
+        <Left>5.73958in</Left>
+        <Value>=Format(cdate(Globals!ExecutionTime),"dddd, MMMM dd, yyyy")</Value>
+      </Textbox>
+    </ReportItems>
+    <Height>0.16in</Height>
+    <PrintOnLastPage>true</PrintOnLastPage>
+  </PageFooter>
+  <TopMargin>0.25in</TopMargin>
+</Report>

@@ -1,0 +1,712 @@
+//VISTA
+
+//Notes
+Senior Housing:         
+Name: 	rs_SeniorIHPCensusSummaryPBI.txt
+Dependency:
+		rs_SeniorIHPCensusSummaryPBI.rdlc
+        --rs_SeniorCensusReportSummaryPBI.rdlc       
+HISTORY:
+   --06/29/2015 Created by VCH
+Modified
+   --01/22/2016 VCH- Modified files to resolve the issue mentioned in the case.
+   --04/07/2016 MK -Modified Files for this case issue.
+   --07/29/2016 Case #3516857 - MK -Modified Files for this case issue.
+   --12/22/2016 Case#3849068 - VC - Report was not showing the Regional Information for atributes
+   --05/04/2017 Case#4242639 - PB - updated the report to include residents with a care level of PC Bundled.
+   --05/26/2017 Case#4307965 - VCH - Modified Pre-OPen Deposits section as per case specs
+   --06/06/2017 Case#4340449 - VCH - Modified to resolve case issue related to Budgeted counts	
+   --02/22/2018 Case#5024067 - VCH - Changed the Budget count logic based on budget GL accounts 
+															  	•	# of Leased AL/PC Apartments – 001005 
+															  	•	# of Leased Lantern Apartments – 001006
+															  	•	# of Leased Lamp Light Apartments – 001006 
+															  	•	Leased Therapy Apartments – 001007 
+ 	--04/17/2018 case#5269295 - VCH - Updated above to match with Review/Edit GL Budget screen															  	
+
+//End Notes
+
+//Database
+SSRS rs_SeniorIHPCensusSummaryPBI.rdlc
+//End Database
+
+//Crystal
+CryActive Y
+Crytree Y
+Param rp_AsOfDate = #Comp1#
+//End Crystal
+
+//Title
+Morning Pointe Weekly Census Report Summary PBI
+//end title
+
+//Select NO CRYSTAL
+DECLARE @asEnddate datetime,
+            @startdate datetime,
+            @i int
+
+Declare @tmpDate TABLE
+(
+      [Week]            int,
+      StartDate   Date,
+      EndDate           Date
+)
+
+IF OBJECT_ID ('TempDb..#temp2') IS NOT NULL
+DROP TABLE #temp2
+
+IF OBJECT_ID ('TempDb..#main_tab') IS NOT NULL
+DROP TABLE #main_tab
+
+IF OBJECT_ID ('TempDb..#TmpOccupancy') IS NOT NULL
+DROP TABLE #TmpOccupancy
+
+Create Table #temp2
+(
+      Description1 varchar(30),
+      propid                  int ,
+      PropCode          varchar(100),
+      OccupancyCount    numeric(10,2),
+      WeekNum                 int )
+
+
+IF OBJECT_ID ('TempDb..#Attrib') IS NOT NULL
+DROP TABLE #Attrib
+
+Create Table #Attrib
+(
+        hprop           int,
+        Region          varchar(100),
+        SUBGROUP3       varchar (100),
+        iSequence       int
+)
+
+Insert Into #Attrib
+SELECT P.Hmy hprop, /*Code to find system attribute for the property*/
+      ltrim(rtrim(ax.SUBGROUP2)) Region,SUBGROUP3 ,isnull(iSequence,99)iSequence
+FROM property p
+  INNER JOIN SeniorpropertyfunctiON ('','') p1 ON p1.propertyid = p.hmy         #CONDITION1#
+  LEFT JOIN Attributes ax ON ax.HPROP = p.hmy
+  LEFT JOIN attributeValue AV ON  av.sValue = Rtrim(Ltrim(ax.SUBGROUP2))
+  LEFT JOIN attributename AN ON av.hAttributename = an.hmy AND an.iFileType = 3
+  WHERE ax.subgroup3 = 'Pre-Open Deposits'
+
+
+SET @asEnddate= #Comp1#
+SET @startdate=DATEADD(wk,-8,@asEnddate)
+SET @i = 1
+
+
+while(@i<=8)
+begin
+      insert into @tmpDate
+      select @i,DATEADD(dd, 1, DATEADD(wk, - @i, @asEnddate)), DATEADD(wk, 1-@i, @asEnddate)
+      set @i=@i+1
+end
+
+SELECT
+        P.hmy  PropertyID,
+        COUNT( case when si.carelevelcode in('ALZ') and si.ContractTypeCode <> 'RES' then isnull(t.hmyperson,0) end) ALZresidentcount ,
+        COUNT(case when si.carelevelcode in('AL','PC') and si.ContractTypeCode <> 'RES' then isnull(t.hmyperson,0) end ) ALPCresidentcount ,
+        sum(isnull(case when si.CareLevelCode in('ALZ') then cast(lv.listoptionValue as numeric(10,2)) else 0 end,0))  ALZOccupancyCount    ,
+        sum(isnull(case when si.CareLevelCode in('AL','PC') then cast(lv.listoptionValue as numeric(10,2)) else 0 end,0))  AL_PCOccupancyCount    ,
+        COUNT(case when si.ContractTypeCode='RES' then isnull(t.hmyperson,0) End)  Respite_count ,
+        sum(isnull(case when ct.SCODE='PT' then cast(lv.listoptionValue as numeric(10,2))else 0 end ,0))  LeasedTherapyCount  ,
+        tmp.[Week]   into  #TmpOccupancy
+        FROM  @tmpDate tmp
+        INNER JOIN property P   on 1=1
+		INNER JOIN Attributes a ON a.HPROP = p.hmy and a.subgroup3 = 'Pre-Open Deposits'
+        INNER JOIN Tenant T ON T.Hproperty = P.hmy
+        INNER JOIN unit u on u.hmy = t.hunit and isnull(u.exclude,0) = 0
+        INNER JOIN Serviceinstance Si ON ( T.Hmyperson = Si.Residentid )
+        INNER JOIN Service S ON ( Si.Serviceid = S.Serviceid   AND S.Serviceclassid = 1 )
+        left  JOIN servicechargetype sct on s.serviceid=sct.serviceid
+        left JOIN Chargtyp ct on ct.hmy=sct.ChargeTypeID
+        INNER JOIN  Listoption L2 ON ( Si.Privacylevelcode = L2.Listoptioncode
+                AND L2.Listname = 'PrivacyLevel' )
+        INNER JOIN  Listoptionvalue Lv ON Lv.Listname = 'PrivacyLevel'
+                AND Lv.Listoptioncode = L2.Listoptioncode
+        where   Si.Serviceinstanceid = ( SELECT
+                Max( Si3.Serviceinstanceid )
+                FROM Serviceinstance Si3
+                INNER JOIN Service S1 ON Si3.Serviceid = S1.Serviceid  AND S1.Serviceclassid = 1
+                WHERE Si3.Residentid = Si.Residentid
+                        AND Si3.Serviceinstanceactiveflag <> 0
+                        AND  Isnull( CONVERT( DATETIME, CONVERT(VARCHAR(11), si3.ServiceInstanceTODate), 101 ), tmp.EndDate ) > = CONVERT( DATETIME, CONVERT(VARCHAR(11), si3.ServiceInstanceFromDate), 101 )
+                        AND Si3.Serviceinstancefromdate = ( SELECT
+                                Max( Si2.Serviceinstancefromdate )
+                                FROM  Serviceinstance Si2
+                                INNER JOIN Service S ON Si2.Serviceid = S.Serviceid
+                                AND S.Serviceclassid = 1
+                                WHERE Si2.Residentid = Si.Residentid
+                                AND Si2.Serviceinstanceactiveflag <> 0
+                                AND Isnull( CONVERT( DATETIME, CONVERT(VARCHAR(11), si2.ServiceInstanceTODate), 101 ), tmp.EndDate ) > = CONVERT( DATETIME, CONVERT(VARCHAR(11), si2.ServiceInstanceFromDate), 101 )
+                                AND CONVERT( DATETIME, CONVERT(VARCHAR(11), si2.ServiceInstanceFromDate), 101 )  <= tmp.EndDate
+                                AND tmp.ENDDate <= Isnull( CONVERT( DATETIME, CONVERT(VARCHAR(11), si2.ServiceInstanceTODate), 101 ), tmp.EndDate )
+                                )
+                )
+           #CONDITION1#
+group by p.saddr1,p.hmy,P.scode,tmp.week
+
+INSERT INTO #temp2
+select '# of New Deposits' as Description1            ,p.hmy,
+ltrim(rtrim(isnull(p.sAddr1, ''))) + ' (' + RTRIM(p.scode) + ')' as propertycode
+,count(distinct sp.hmy) ,
+                              tmp.Week
+                                    FROM  @tmpDate tmp
+             inner JOIN Property P    on 1=1
+                              inner join SeniorProspect sp on p.hmy=sp.hproperty
+                              inner join Tenant TN on tn.hmyperson=isnull(sp.htenant,0)
+                              inner join seniorresidenthistory srh on tn.hmyperson=srh.residentid
+                              and CONVERT(DATETIME, CONVERT(CHAR(10), srh.ResidentHistoryDate, 121), 101)
+                                                                          BETWEEN  tmp.startdate and tmp.enddate
+                                                          and srh.ResidentHistoryCode in ('CRE','PWL')
+                           /*   INNER JOIN Trans T    ON T.Hperson   = TN.HMYPERSON AND CONVERT(DATETIME, CONVERT(CHAR(10), T.SDateOccurred, 121), 101) BETWEEN  tmp.startdate and tmp.enddate
+                              INNER JOIN Detail D   ON D.Hinvorrec = T.HMY
+                              INNER JOIN Acct Act   ON Act.HMY     = D.Hacct
+                              WHERE    T.ITYpe   = 6   AND d.samount > 0
+                              AND t.sNotes NOT LIKE '%Reverses receipt Ctrl%'
+                              AND t.sNotes NOT LIKE '%Reversed by ctrl%' */
+                              and tn.ISTATUS in (2,8)                           #CONDITION1#
+group by p.saddr1,p.hmy,P.scode,tmp.week
+
+union all
+
+SELECT '# of existing Deposits' AS Description1
+        ,p.hmy
+        ,ltrim(rtrim(isnull(p.sAddr1, ''))) + ' (' + RTRIM(p.scode) + ')' AS propertycode
+        ,count(DISTINCT sp.hmy)
+        ,tmp.Week
+        FROM @tmpDate tmp
+        INNER JOIN Property P ON 1 = 1
+        INNER JOIN SeniorProspect sp ON p.hmy = sp.hproperty
+        INNER JOIN Tenant TN ON tn.hmyperson = isnull(sp.htenant, 0)
+        left JOIN seniorresidenthistory srh ON tn.hmyperson = srh.residentid
+        WHERE srh.ResidentHistoryID IN (
+                        SELECT max(srh1.ResidentHistoryID)
+                        FROM SeniorResidentHistory srh1
+                        WHERE srh1.ResidentId = srh.residentid
+                                AND srh1.ResidentHistoryDate = (
+                                        SELECT max(srh2.ResidentHistoryDate)
+                                        FROM SeniorResidentHistory srh2
+                                        WHERE srh2.residentid = Srh1.residentid
+                                                AND srh2.ResidentHistoryDate <= tmp.startdate
+                                                AND srh2.ResidentHistoryCode IN ('CRE','PWL')
+                                        GROUP BY srh2.residentID
+                                        )
+                        GROUP BY srh1.ResidentID
+                        )
+                /* INNER JOIN Trans T    ON T.Hperson   = TN.HMYPERSON AND CONVERT(DATETIME, CONVERT(CHAR(10), T.SDateOccurred, 121), 101)<=  tmp.enddate
+                  INNER JOIN Detail D   ON D.Hinvorrec = T.HMY
+                  INNER JOIN Acct Act   ON Act.HMY     = D.Hacct
+                  WHERE    T.ITYpe   = 6   AND d.samount > 0
+                  AND t.sNotes NOT LIKE '%Reverses receipt Ctrl%'
+                  AND t.sNotes NOT LIKE '%Reversed by ctrl%' */
+                AND tn.ISTATUS IN (2,8)
+                   #CONDITION1#
+GROUP BY p.saddr1,p.hmy,P.scode,tmp.week
+
+
+
+
+/* Main Table */
+create table #Main_tab
+        (
+                phmy int,
+                scode varchar(20),
+                Activityname varchar(100),
+                section varchar(100),
+                Budget numeric(10,2),
+                week1 numeric(10,2),
+                week2 numeric(10,2),
+                week3 numeric(10,2),
+                week4 numeric(10,2),
+                week5 numeric(10,2),
+                week6 numeric(10,2),
+                week7 numeric(10,2),
+                week8 numeric(10,2),
+                orderby int,
+                ascapFlag int
+        )
+
+insert into #Main_Tab
+select distinct p.hmy,p.scode,des.Activity,
+des.section,
+0 Bugdet,
+        Round(isnull([1],0),0) week1,
+        Round(isnull([2],0),0) week2,
+        Round(isnull([3],0),0)  week3,
+        Round(isnull([4],0),0)  week4,
+        Round(isnull([5],0),0)  week5,
+        Round(isnull([6],0),0)  week6,
+        Round(isnull([7],0),0)  week7,
+        Round(isnull([8],0),0)  week8
+ ,des.orderby,null ascapFlag
+from Property p
+INNER JOIN Attributes a ON a.HPROP = p.hmy and a.subgroup3 = 'Pre-Open Deposits'
+inner join Unit u on u.HPROPERTY=p.HMY and isnull(u.exclude,0) = 0
+inner join
+(
+SELECT '# of New Deposits' Activity, 16 OrderBy ,'Deposits' Section
+UNION ALL
+SELECT '# of Existing Deposits' Activity, 17 OrderBy ,'Deposits' Section
+) Des on 1=1 and p.iType =3/*and p.HMY in (select distinct hProperty from Unit)*/
+left join
+      (select Description1,propid,propcode,isnull(OccupancyCount,0)as OccupancyCount,WeekNum from #temp2 )as t
+PIVOT
+
+(
+      max(OccupancyCount)
+      FOR weeknum in ([1],[2],[3],[4],[5],[6],[7],[8])
+) as pvt on pvt.Description1 = des.Activity and p.hmy = pvt.propid
+where 1=1       #CONDITION1#
+order by orderby
+
+IF NOT EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[dbo].[ASCAP30]') AND  type in (N'U'))
+Begin
+update MT
+set MT.Budget=0, ascapFlag=0
+ FROM #main_tab MT
+end
+
+/* Main Table */
+insert into #Main_tab (phmy ,scode,Activityname,section, Budget ,week1 ,week2 ,week3 ,week4 ,week5 , week6 ,week7 ,  week8 ,orderby,ascapFlag)
+select phmy,scode,'Total # of Deposits',section, sum(budget),
+SUM(week1) week1,SUM(week2) week2,SUM(week3)week3
+,SUM(week4)week4
+,SUM(week5) week5,SUM(week6) week6,SUM(week7)week7 ,SUM(week8)week8,18 orderby,ascapFlag
+from #Main_tab
+where orderby in (16,17)
+group by phmy,scode,section,ascapFlag
+
+select phmy,scode,
+Dense_Rank() over (order by mt.scode) DenseRank,
+mt.section,
+mt.Activityname,
+case when mt.orderby between 5 and 18 then 0
+        else  CAST(mt.Budget as int) end Budget
+,cast(week1 as int)week1
+,cast(week2 as int)week2
+,cast(week3 as int)week3
+,cast(week4 as int)week4
+,cast(week5 as int)week5
+,cast(week6 as int)week6
+,cast(week7 as int)week7
+,cast(week8 as int)week8
+,ltrim(rtrim(a.Region)) Region,SUBGROUP3
+,orderby as ssequence,iSequence,ascapFlag
+into #tmppre
+from #Main_tab mt
+inner join #Attrib a on mt.phmy= a.hProp
+where activityname='Total # of Deposits'
+//End Select
+
+//Select 
+DECLARE @asEnddate DATETIME
+	,@startdate DATETIME
+	,@i INT,@asRangeEnddate datetime
+DECLARE @tmpDate TABLE (
+	[Week] INT
+	,StartDate DATE
+	,EndDate DATE
+)
+IF OBJECT_ID('TempDb..#temptotunitcount') IS NOT NULL
+DROP TABLE #temptotunitcount
+
+IF OBJECT_ID('TempDb..#temp') IS NOT NULL
+	DROP TABLE #temp
+
+CREATE TABLE #temp (
+	propid INT
+	,PropCode VARCHAR(100)
+	,OccupancyCount NUMERIC(10, 2)
+	,WeekNum INT
+	)
+
+IF OBJECT_ID('TempDb..#PropCount') IS NOT NULL
+	DROP TABLE #PropCount
+
+CREATE TABLE #PropCount (
+	propid NUMERIC(10, 2)
+	,PropCode VARCHAR(500)
+	,[Total units] INT
+	,Bugdet NUMERIC(10, 2)
+	,week1 NUMERIC(10, 2)
+	,week2 NUMERIC(10, 2)
+	,week3 NUMERIC(10, 2)
+	,week4 NUMERIC(10, 2)
+	,week5 NUMERIC(10, 2)
+	,week6 NUMERIC(10, 2)
+	,week7 NUMERIC(10, 2)
+	,week8 NUMERIC(10, 2)
+	,ascapflag INT,code varchar(20)
+	)
+
+IF OBJECT_ID('TempDb..#RegionCount') IS NOT NULL
+	DROP TABLE #RegionCount
+
+CREATE TABLE #RegionCount (
+	iSequence NUMERIC(10, 2)
+	,Region VARCHAR(500)
+	,[Total units] INT
+	,Bugdet NUMERIC(10, 2)
+	,week1 NUMERIC(10, 2)
+	,week2 NUMERIC(10, 2)
+	,week3 NUMERIC(10, 2)
+	,week4 NUMERIC(10, 2)
+	,week5 NUMERIC(10, 2)
+	,week6 NUMERIC(10, 2)
+	,week7 NUMERIC(10, 2)
+	,week8 NUMERIC(10, 2)
+	,ascapflag INT
+	)
+
+SET @asEnddate = #Comp1#
+
+SET @startdate = DATEADD(wk, - 8, @asEnddate)
+SET @i = 1
+
+WHILE (@i <= 8)
+BEGIN
+	INSERT INTO @tmpDate
+	SELECT @i
+		,DATEADD(dd, 1, DATEADD(wk, - @i, @asEnddate))
+		,DATEADD(wk, 1 - @i, @asEnddate)
+
+	SET @i = @i + 1
+END
+
+
+set @asRangeEnddate = DATEADD(dd, 1, DATEADD(wk, - 8, @asEnddate))
+
+IF OBJECT_ID('TempDb..#temp1') IS NOT NULL
+	DROP TABLE #temp1
+	
+	create table #temp1 (minmovin datetime,scode varchar(30), unitcount int,totalunitdiff int)
+	insert Into  #temp1 
+	/*values ('2015-08-15 00:00:00.000','lvlm',73,null)
+	--,('2015-08-01 00:00:00.000','powl',73,null)
+	--,('2015-08-23 00:00:00.000','chtt',77,null)*/
+select min(t.dtmovein) ,ltrim(rtrim(p.scode))
+,uv.unitcount,null
+from 
+ PROPERTY p  
+inner join tenant t on p.HMY=t.HPROPERTY
+inner join 
+(select COUNT(u.hmy) unitcount ,p.scode  from Unit u
+ inner join PROPERTY p on   u.hProperty= p.HMY and isnull(u.exclude,0) = 0
+ group by p.scode) 
+  uv on uv.scode=p.scode
+ LEFT JOIN attributes a ON p.hmy = a.hprop and a.subgroup3 in ('Under Development','Pre-Open Deposits')
+where 
+t.istatus=0  and ISNULL(a.hprop,0)=0
+group by p.scode,uv.unitcount
+having min(t.dtmovein) between   @asRangeEnddate and @asEnddate
+ order by 1 desc
+
+
+INSERT INTO #temp
+SELECT P.hmy PropertyID
+	,ltrim(rtrim(isnull(p.sAddr1, '')))  AS PropertyCode
+	,sum(cast(lv.listoptionValue AS NUMERIC(10, 2))) OccupancyCount
+	,tmp.Week
+FROM @tmpDate tmp
+INNER JOIN property P ON 1 = 1
+INNER JOIN Tenant T ON T.Hproperty = P.hmy
+INNER JOIN unit u ON u.hmy = t.hunit
+	AND isnull(u.exclude, 0) = 0
+INNER JOIN Serviceinstance Si ON (T.Hmyperson = Si.Residentid)
+	AND si.carelevelcode IN (
+		'AL'
+		,'ALZ'
+		,'PC','LL','BUN'
+		)
+INNER JOIN Service S ON (
+		Si.Serviceid = S.Serviceid
+		AND S.Serviceclassid = 1
+		)
+INNER JOIN Seniorresident Rs ON (T.Hmyperson = Rs.Residentid)
+INNER JOIN Listoption L1 ON (
+		Si.Carelevelcode = L1.Listoptioncode
+		AND L1.Listname = 'CareLevel'
+		)
+INNER JOIN Listoption L2 ON (
+		Si.Privacylevelcode = L2.Listoptioncode
+		AND L2.Listname = 'PrivacyLevel'
+		)
+INNER JOIN Listoptionvalue Lv ON Lv.Listname = 'PrivacyLevel'
+	AND Lv.Listoptioncode = L2.Listoptioncode
+WHERE Si.Serviceinstanceid = (
+		SELECT Max(Si3.Serviceinstanceid)
+		FROM Serviceinstance Si3
+		INNER JOIN Service S1 ON Si3.Serviceid = S1.Serviceid
+			AND S1.Serviceclassid = 1
+		WHERE Si3.Residentid = Si.Residentid
+			AND Si3.Serviceinstanceactiveflag <> 0
+			AND Isnull(CONVERT(DATETIME, CONVERT(VARCHAR(11), si3.ServiceInstanceTODate), 101), tmp.EndDate) > = CONVERT(DATETIME, CONVERT(VARCHAR(11), si3.ServiceInstanceFromDate), 101)
+			AND Si3.Serviceinstancefromdate = (
+				SELECT Max(Si2.Serviceinstancefromdate)
+				FROM Serviceinstance Si2
+				INNER JOIN Service S ON Si2.Serviceid = S.Serviceid
+					AND S.Serviceclassid = 1
+				WHERE Si2.Residentid = Si.Residentid
+					AND Si2.Serviceinstanceactiveflag <> 0
+					AND Isnull(CONVERT(DATETIME, CONVERT(VARCHAR(11), si2.ServiceInstanceTODate), 101), tmp.EndDate) > = CONVERT(DATETIME, CONVERT(VARCHAR(11), si2.ServiceInstanceFromDate), 101)
+					AND CONVERT(DATETIME, CONVERT(VARCHAR(11), si2.ServiceInstanceFromDate), 101) <= tmp.EndDate
+					AND tmp.ENDDate <= Isnull(CONVERT(DATETIME, CONVERT(VARCHAR(11), si2.ServiceInstanceTODate), 101), tmp.EndDate)
+				)
+		)#CONDITION1#
+GROUP BY p.HMY
+	,P.sCode
+	,tmp.week
+	,p.saddr1
+
+UNION ALL
+
+SELECT p.hmy propid
+	,ltrim(rtrim(isnull(p.sAddr1, '')))  AS PropCode
+	,sum(cast(lv.listoptionValue AS NUMERIC(10, 2))) OccupancyCount
+	,tmp.Week
+FROM @tmpDate tmp
+LEFT JOIN Property P ON 1 = 1
+INNER JOIN Tenant T ON T.Hproperty = P.hmy
+INNER JOIN unit u ON u.hmy = t.hunit
+	AND isnull(u.exclude, 0) = 0
+INNER JOIN Serviceinstance Si ON (T.Hmyperson = Si.Residentid)
+INNER JOIN Service S ON (
+		Si.Serviceid = S.Serviceid
+		AND S.Serviceclassid = 1
+		)
+INNER JOIN servicechargetype sct ON s.serviceid = sct.serviceid
+INNER JOIN Chargtyp ct ON ct.hmy = sct.ChargeTypeID
+	AND ct.SCODE = 'PT'
+INNER JOIN Seniorresident Rs ON (T.Hmyperson = Rs.Residentid)
+INNER JOIN Listoption L2 ON (
+		Si.Privacylevelcode = L2.Listoptioncode
+		AND L2.Listname = 'PrivacyLevel'
+		)
+INNER JOIN Listoptionvalue Lv ON Lv.Listname = 'PrivacyLevel'
+	AND Lv.Listoptioncode = L2.Listoptioncode
+WHERE Si.Serviceinstanceid = (
+		SELECT Max(Si3.Serviceinstanceid)
+		FROM Serviceinstance Si3
+		INNER JOIN Service S1 ON Si3.Serviceid = S1.Serviceid
+			AND S1.Serviceclassid = 1
+		WHERE Si3.Residentid = Si.Residentid
+			AND Si3.Serviceinstanceactiveflag <> 0
+			AND Isnull(Si3.Serviceinstancetodate, tmp.EndDate) > = Si3.Serviceinstancefromdate
+			AND Si3.Serviceinstancefromdate = (
+				SELECT Max(Si2.Serviceinstancefromdate)
+				FROM Serviceinstance Si2
+				INNER JOIN Service S ON Si2.Serviceid = S.Serviceid
+					AND S.Serviceclassid = 1
+				WHERE Si2.Residentid = Si.Residentid
+					AND Si2.Serviceinstanceactiveflag <> 0
+					AND Isnull(Si2.Serviceinstancetodate, tmp.EndDate) > = Si2.Serviceinstancefromdate
+					AND Si2.Serviceinstancefromdate <= tmp.EndDate
+					AND tmp.EndDate <= Isnull(Si2.Serviceinstancetodate, tmp.EndDate)
+				)
+		)#CONDITION1#
+GROUP BY p.HMY
+	,P.sCode
+	,tmp.Week
+	,p.saddr1 
+
+UNION ALL
+
+SELECT p.hmy propid
+	,ltrim(rtrim(isnull(p.sAddr1, '')))  AS PropCode
+	,COUNT(DISTINCT SAU.HUNIT) OccupancyCount
+	,tmp.Week
+FROM @tmpDate tmp
+LEFT JOIN Property P ON 1 = 1
+INNER JOIN Tenant T ON T.Hproperty = P.hmy
+INNER JOIN unit u ON u.hmy = t.hunit
+	AND isnull(u.exclude, 0) = 0
+INNER JOIN SeniorAdditionalUnit sau on sau.htenant = t.hmyperson and sau.bActive = 1
+WHERE 1=1 AND ((SAU.DTSTART <= TMP.STARTDATE AND ISNULL(SAU.DTEND,TMP.STARTDATE) BETWEEN TMP.STARTDATE AND TMP.ENDDATE)  OR 
+				(SAU.DTSTART BETWEEN TMP.STARTDATE AND TMP.ENDDATE AND ISNULL(SAU.DTEND,TMP.STARTDATE) BETWEEN TMP.STARTDATE AND TMP.ENDDATE) OR
+				(SAU.DTSTART BETWEEN TMP.STARTDATE AND TMP.ENDDATE AND ISNULL(SAU.DTEND,TMP.ENDDATE) >= TMP.ENDDATE)
+				)
+				AND T.ISTATUS NOT IN (7)
+#CONDITION1#
+GROUP BY p.HMY
+	,P.sCode
+	,tmp.Week
+	,p.saddr1 
+
+
+	
+	/*  Property Count */
+
+	INSERT INTO #PropCount
+	SELECT DISTINCT p.hmy
+		,ltrim(rtrim(isnull(p.sAddr1, ''))) 
+		,(
+			SELECT COUNT(u.hmy)
+			FROM Unit u
+			WHERE u.hProperty = p.HMY
+				AND isnull(u.exclude, 0) = 0
+			) [Total units]
+		,(
+			/* VCH - Case# 5024067 */
+			SELECT abs(sum(t.sBudget))
+			FROM Total t
+				Inner join acct a on a.hmy = t.hAcct
+			WHERE t.hppty = p.hmy 	
+				AND a.scode IN ( '001005', '001006', '001007' )
+       AND t.iBook = 1
+				AND (CAST(MONTH(@asEnddate) AS VARCHAR(2)) + '/' + CAST(YEAR(@asEnddate) AS VARCHAR(4)))=(CAST(MONTH(t.uMonth) AS VARCHAR(2)) + '/' + CAST(YEAR(t.uMonth) AS VARCHAR(4)))
+			) Bugdet
+		,Round(isnull([1], 0), 0) week1
+		,Round(isnull([2], 0), 0) week2
+		,Round(isnull([3], 0), 0) week3
+		,Round(isnull([4], 0), 0) week4
+		,Round(isnull([5], 0), 0) week5
+		,Round(isnull([6], 0), 0) week6
+		,Round(isnull([7], 0), 0) week7
+		,Round(isnull([8], 0), 0) week8
+		,1,p.SCODE 
+	FROM Property p
+	INNER JOIN Unit u ON u.HPROPERTY = p.HMY
+		AND isnull(u.exclude, 0) = 0
+	LEFT JOIN (
+		SELECT propid
+			,propcode
+			,OccupancyCount
+			,WeekNum
+		FROM #temp
+		) t
+	PIVOT(sum(OccupancyCount) FOR weeknum IN (
+				[1]
+				,[2]
+				,[3]
+				,[4]
+				,[5]
+				,[6]
+				,[7]
+				,[8]
+				)) AS pvt ON p.hmy = pvt.propid
+	WHERE p.iType = 3 #CONDITION1# /* and p.HMY in (Select distinct HPROPERTY from unit) */
+ 
+/*  Region Count */
+
+INSERT INTO #RegionCount
+SELECT av.iSequence + 1000 iSequence
+	,Rtrim(Ltrim(SUBGROUP2)) + ' Region' Region
+	,SUM([Total units]) [Total units]
+	,SUM(isnull(Bugdet, 0)) Bugdet
+	,SUM(week1) week1
+	,SUM(week2) week2
+	,SUM(week3) week3
+	,SUM(week4) week4
+	,SUM(week5) week5
+	,SUM(week6) week6
+	,SUM(week7) week7
+	,SUM(week8) week8
+	,ascapflag
+FROM Attributes a
+INNER JOIN AttributeValue av ON av.sValue = Rtrim(Ltrim(SUBGROUP2))
+INNER JOIN #PropCount PC ON pc.propid = a.HPROP
+WHERE a.subgroup3<>'Under Development' AND a.subgroup3<>'Pre-Open Deposits'
+GROUP BY SUBGROUP2
+	,av.iSequence
+	,ascapflag
+
+UNION
+
+SELECT 1011
+	,'% Occupied Stabilized' Attribute
+	,sum(CASE 
+			WHEN SUBGROUP3 IN (
+					'Focus'
+					,'Stabilized'
+					)
+				THEN [Total units]
+			ELSE '0'
+			END) [Total units]
+	,sum(CASE 
+			WHEN SUBGROUP3 IN (
+					'Focus'
+					,'Stabilized'
+					)
+				THEN isnull(Bugdet, 0)
+			ELSE '0'
+			END) Bugdet
+	,sum(CASE 
+			WHEN SUBGROUP3 IN (
+					'Focus'
+					,'Stabilized'
+					)
+				THEN week1
+			ELSE '0'
+			END) week1
+	,sum(CASE 
+			WHEN SUBGROUP3 IN (
+					'Focus'
+					,'Stabilized'
+					)
+				THEN week2
+			ELSE '0'
+			END) week2
+	,sum(CASE 
+			WHEN SUBGROUP3 IN (
+					'Focus'
+					,'Stabilized'
+					)
+				THEN week3
+			ELSE '0'
+			END) week3
+	,sum(CASE 
+			WHEN SUBGROUP3 IN (
+					'Focus'
+					,'Stabilized'
+					)
+				THEN week4
+			ELSE '0'
+			END) week4
+	,sum(CASE 
+			WHEN SUBGROUP3 IN (
+					'Focus'
+					,'Stabilized'
+					)
+				THEN week5
+			ELSE '0'
+			END) week5
+	,sum(CASE 
+			WHEN SUBGROUP3 IN (
+					'Focus'
+					,'Stabilized'
+					)
+				THEN week6
+			ELSE '0'
+			END) week6
+	,sum(CASE 
+			WHEN SUBGROUP3 IN (
+					'Focus'
+					,'Stabilized'
+					)
+				THEN week7
+			ELSE '0'
+			END) week7
+	,sum(CASE 
+			WHEN SUBGROUP3 IN (
+					'Focus'
+					,'Stabilized'
+					)
+				THEN week8
+			ELSE '0'
+			END) week8
+	,ascapflag
+FROM Attributes a
+INNER JOIN #PropCount PC ON pc.propid = a.HPROP
+WHERE a.subgroup3<>'Under Development' AND a.subgroup3<>'Pre-Open Deposits'
+GROUP BY ascapflag
+
+
+//End Select
+
+//Filter
+//Type, DataTyp, 			  Name,			Caption,  	Key,	List,							Val1,	Val2, Mandatory, Multi-Type, 	Title, Title
+	C,      T,           hProp,   Community,    	,     61,  P.hMy = #hProp#,     ,   		N,      Y,     		Y,        
+	0,      A,    			 comp1,        Date,      ,       ,       					,    	,			 	Y,      ,       	Y,
+//end filter 

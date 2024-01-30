@@ -1,0 +1,241 @@
+//VISTA
+
+//Notes
+
+Senior Housing: Financial Move In Report
+           
+Name: 	rs_SeniorMoveInFinancial.txt
+
+Dependency:
+        rs_SeniorMoveInFinancial.rdlc
+ 
+        
+HISTORY:
+   -- 05/5/2021: Created TR#586199
+
+//End Notes
+
+//Database
+<<SELECT CASE WHEN '#DisplayRates#'= 'Yes' THEN 'SSRS rs_seniorMoveInFinancialWithLease.rdlc' ELSE 'SSRS rs_SeniorMoveInFinancial.rdlc' END WHERE 1=1>> 
+//End Database
+
+//Crystal
+CryActive Y
+Crytree Y
+param rptVersion = 50.12.08 23.01
+param Date1=#dat1#
+param Date2=#dat2#
+param Actual=#bActual#
+param rptProperty = select stuff((select ', ' + SCODE as [text()] from (select distinct ltrim(rtrim(p.saddr1 + '('+ltrim(rtrim(p.scode))+')')) SCODE from Property P where 1 = 1 #CONDITION1#) x for xml path ('')),1,1,'')
+param tenantdrill=PageASPX/YSIEntry.aspx?e=ResidentCensus&ResidentID=
+param sort=#sortKey#
+param GroupBy=#grp#
+param SumBy=#sumBy#
+param Aggregate=#Aggregate#
+param SRDate1=#srdat1#
+param SRDate2=#srdat2#
+param CareLvl= #CareLvl#
+param ContTyp = #ContTyp#
+param ResStat = #Status#
+param DepoDt = #Dpdate#
+param IncSec = #SecResident#
+param txtDate1=#dat1#
+param txtDate2=#dat2#
+param txtSRDate1=#srdat1#
+param txtSRDate2=#srdat2#
+param DisplayRates=#DisplayRates#
+param datemask=SELECT ISNULL((SELECT REPLACE(REPLACE(ci.sdatemask,'D','d'),'Y','y') FROM country_info ci, pmuser pm WHERE pm.scountry = ci.scode AND pm.uname = LTRIM(RTRIM( '#@@USERNAME#' ))), 'MM/dd/yyyy')
+//End Crystal
+
+//Title
+Financial Move-In Report 
+//End Title
+
+//Select No Crystal
+
+CREATE TABLE #Details
+( attribute VARCHAR (100),
+attrib VARCHAR (100),
+phMy NUMERIC,
+propname VARCHAR (300),
+istatus NUMERIC(18,0),
+ThMy NUMERIC(18,0),
+hTcode VARCHAR (10),
+PropespectCode VARCHAR(250),
+sResidentName VARCHAR (600),
+moveindate DATETIME ,
+uhmy NUMERIC,
+uscode VARCHAR (8),
+utscode VARCHAR (8),
+utsdesc VARCHAR (40),
+privacylevel VARCHAR (20),
+carelevel VARCHAR (20),
+ResStatus VARCHAR (60),
+ServiceStartDate DATETIME ,
+SummarizeBy VARCHAR (600),
+AgentName VARCHAR (60),
+MarketRate NUMERIC(18,2),
+AcutalRate NUMERIC(18,2),
+Deposit NUMERIC(18,2),
+ContractDate DATETIME ,
+Propsectsource VARCHAR (200),
+ContTyp VARCHAR (20))
+
+DECLARE @sStatus   VARCHAR(30), @sDat1 DATETIME, @sDat2 DATETIME,@srDat1 DATETIME,@srDat2 DATETIME,@DpDate DATETIME
+		,@grp VARCHAR(20),@SecResident VARCHAR(3),@DisplayRates VARCHAR(3)
+		
+SET @sStatus   = '#bActual#'
+SET @SecResident = '#SecResident#'
+SET @grp = '#grp#'
+SET @DisplayRates = '#DisplayRates#'
+
+SET @sDat1 = CASE WHEN '#dat1#' = '' THEN '01/01/1900' ELSE '#dat1#' END
+SET @sDat2 = CASE WHEN '#dat2#' = '' THEN '01/01/2100' ELSE '#dat2#' END 
+SET @srDat1 = CASE WHEN '#srdat1#' = '' THEN '01/01/1900' ELSE '#srdat1#' END
+SET @srDat2 = CASE WHEN '#srdat2#' = '' THEN '01/01/2100' ELSE '#srdat2#' END
+SET @DpDate = CASE WHEN '#Dpdate#' = '' THEN GETDATE() ELSE '#Dpdate#' END
+
+	DECLARE @carelev VARCHAR(MAX),@PropertyCode	VARCHAR(4000),@ResStatus VARCHAR(MAX),@ContTyp VARCHAR(MAX), @flag VARCHAR(20)  
+
+    SET @flag = 'Financial' 
+	SET @ContTyp = ''
+	SET @carelev = ''
+	SET @PropertyCode = ''
+	SET @ResStatus = ''
+	
+	SELECT   @carelev = @carelev + LTRIM( RTRIM( listoptioncode ) ) + ','
+	FROM   listoption P
+	WHERE ListName='CareLevel' AND listoptionname IN ('#CareLvl#')
+	
+	SELECT @PropertyCode = @PropertyCode + COALESCE(LTRIM(RTRIM(P.sCode)), '') + ',' 
+	FROM 	Property P 
+	INNER JOIN ListProp2 l ON l.hProperty = p.hmy
+	WHERE l.hProplist IN (SELECT DISTINCT hmy FROM Property WHERE SCODE  IN ('#pcode#'))
+
+	IF @PropertyCode = '' 
+		SELECT @PropertyCode = @PropertyCode + COALESCE(LTRIM(RTRIM(P.sCode)), '') + ',' FROM Property P
+	
+	SELECT @ResStatus = @ResStatus + LTRIM( RTRIM( iStatus ) ) + ','FROM SeniorResidentStatus WHERE Status IN ('#Status#')
+
+	SELECT   @ContTyp = @ContTyp + LTRIM( RTRIM( l1.listoptioncode ) ) + ','
+	FROM listoption l1 WHERE l1.listname='ContractType' AND LTRIM(RTRIM(l1.listoptionname)) IN ('#ContTyp#')
+	
+	SET @PropertyCode = LEFT(@PropertyCode,LEN(@PropertyCode)-1)	
+
+INSERT INTO #details (attribute,attrib,phMy,propname,sResidentName,istatus,ThMy,moveindate,uhmy,uscode,utscode,utsdesc,privacylevel,
+			carelevel,ServiceStartDate,MarketRate,AcutalRate,Deposit,ContTyp)
+EXEC SeniorMoveInMoveOutDetailFinancial 'MoveIn',@PropertyCode,@grp,@sStatus,@carelev,@ResStatus,@ContTyp,@sDat1, @sDat2,@srDat1,@srDat2,@DpDate,@SecResident,@DisplayRates,@flag
+
+UPDATE d set Propsectsource = CASE WHEN sp1.sLastName IS NULL THEN ISNULL(sps.SourceName,'N/A') ELSE sp1.sLastName END
+			, AgentName = Case when @sStatus in ('Actual','Scheduled') 
+					then ISNULL(a.sName,'N/A')+(CASE WHEN a.dtinactive <=GETDATE() THEN '(Inactive)' ELSE ''END)
+					when @sStatus = 'Scheduled Unit Transfer' THEN 'N/A' END ,
+			PropespectCode = Case WHEN @sStatus in ('Actual','Scheduled') 
+						THEN ISNULL(CONVERT(VARCHAR(19),sp.hmy),'New Resident')
+						WHEN @sStatus = 'Scheduled Unit Transfer' 
+						THEN 'UNIT TRANSFER FROM '+ u2.scode + '-' + l4.listoptionname END
+			,hTcode = LTRIM(RTRIM(t.scode))
+			,ContractDate= t.dtsigndate 
+			,ResStatus= ts.status
+FROM #details d
+	INNER JOIN tenant t on t.hmyperson =d.ThMy
+	INNER JOIN seniorresident sr ON t.hmyperson = sr.residentid 
+	INNER JOIN listoption l4 ON (l4.listoptioncode = sr.PrivacyLevelcode AND l4.listname = 'PrivacyLevel')
+	LEFT JOIN unit u2 ON u2.hmy = t.hunit 
+	LEFT JOIN SeniorResidentStatus ts ON (ts.istatus = t.istatus)
+	LEFT JOIN seniorprospect sp ON sp.hmy=sr.prospectid
+	LEFT JOIN seniorprospectsource sps ON sp.hsource=sps.sourceid
+	LEFT JOIN SeniorContact sc1 ON (sps.hReferralContact = sc1.ContactID AND sps.SourceTypeCode = 'REF')
+	LEFT JOIN SeniorProspect sp1 ON (sc1.ResidentID = sp1.hMy AND sp1.sStatus = 'Referral')
+	LEFT JOIN listoption l3 ON l3.listoptioncode=sps.SourceTypeCode AND l3.listname='SourceType'
+	LEFT JOIN agentnames a ON (sp.hAgent = a.hmy)	
+
+//End Select
+
+//Select
+SELECT d.attribute,
+	d.attrib
+	,d.phMy ,
+	d.propname,d.istatus,d.ThMy,d.hTcode,d.PropespectCode,d.sResidentName,d.moveindate,d.uscode ucode,
+	LTRIM(RTRIM(ISNULL(utsdesc,''))) + ' ('+ (LTRIM(RTRIM(ISNULL(utScode,''))))+')' utdesc,
+	l2.listoptionname privacylevel ,l1.listoptionname carelevel ,
+	CASE '#sortKey#' WHEN 'Move-In Date' THEN convert(varchar(10),d.moveindate,102)
+		  	WHEN 'Resident Last Name' THEN d.sResidentName 
+			ELSE d.uscode 
+			END  Sortby, 
+	d.ResStatus ,d.ServiceStartDate ,
+	CASE '#Aggregate#' 
+		WHEN 'Yes' THEN '*None'	ELSE  
+			CASE WHEN '#SumBy#'='Care Level' THEN l1.listoptionname
+				WHEN '#SumBy#' = 'Unit Type' 
+				THEN LTRIM(RTRIM(ISNULL(utsdesc,'')))
+				WHEN '#SumBy#'= 'Community' THEN d.propname
+				WHEN '#SumBy#'= 'Resident' THEN d.sResidentName
+			ELSE '' END END SummarizeBy,
+	d.AgentName ,d.MarketRate ,d.AcutalRate ,d.Deposit ,d.ContractDate ,
+	CASE WHEN ISNULL(Ci1.Scode, 'US') IN ('US','CAN')THEN '$' ELSE '' END Currencysymbol,
+	d.Propsectsource ,
+	loct.ListOptionName ListOptionName
+FROM #details d
+	INNER JOIN PROPERTY p on p.hmy=d.pHmy
+	INNER JOIN ListOption loct ON ListName = 'ContractType' AND loct.ListOptionCode = d.ContTyp
+	INNER JOIN listoption l1 ON d.carelevel = l1.listoptioncode AND l1.listname = 'CareLevel'
+	INNER JOIN listoption l2 ON d.privacylevel = l2.listoptioncode AND l2.listname = 'PrivacyLevel'
+	LEFT JOIN Country_info Ci1 ON Ci1.Hmy = P.Hcountry
+ORDER BY phMy,Sortby,ucode ,privacylevel
+//End Select
+
+//Select MovInBy
+
+SELECT	CASE '#Aggregate#' WHEN 'Yes'  THEN '1' ELSE propname END Prop,
+		CASE WHEN '#SumBy#'='Care Level' THEN l1.listoptionname
+			WHEN '#SumBy#' = 'Unit Type' 
+			THEN LTRIM(RTRIM(ISNULL(utsdesc,'')))
+			WHEN '#SumBy#'= 'Community' THEN d.propname
+			WHEN '#SumBy#'= 'Resident' THEN d.sResidentName
+		ELSE ''
+	END  GroupBy,
+		COUNT(htcode) AS NumOfMoveIns,
+		SUM(DATEDIFF(mm, moveindate, CONVERT(DATETIME, GETDATE(), 101))) AvgStay
+FROM #details d
+INNER JOIN listoption l1 ON d.carelevel = l1.listoptioncode AND l1.listname = 'CareLevel'
+WHERE '#bActual#' = 'Actual'
+GROUP BY CASE WHEN '#SumBy#'='Care Level' THEN l1.listoptionname
+			WHEN '#SumBy#' = 'Unit Type' THEN LTRIM(RTRIM(ISNULL(utsdesc,'')))
+			WHEN '#SumBy#'= 'Community' THEN d.propname
+			WHEN '#SumBy#'= 'Resident' THEN d.sResidentName
+		ELSE '' 
+	END,
+CASE '#Aggregate#' WHEN 'Yes'  THEN '1' ELSE propname END  
+//End Select
+
+//SELECT No Crystal After
+DROP TABLE #details
+//End Select
+
+//Columns
+//Type  Name Head1 Head2 Head3 Head4 Show Color Formula Drill                             Key Width
+I,      hMy, ,     ,     ,     ,     Y,   ,     ,       ,                                 ,   1300,
+T,      ,    ,     ,     ,     ,     Y,   ,     ,       ,                                 ,   1300,
+T,      ,    ,     ,     ,     ,     Y,   ,     ,       ,                                 ,   1300,
+//End columns
+
+//Filter
+//Type, DataTyp, Name, Caption,   Key, List, Val1,   Val2, Mandatory, Multi-Type, Title, Title
+0, T,     pcode,    Community, ,  61, "p.scode IN (#pcode#)",  	,  , Y,
+R, A, srdat1:srdat2,   Service Start Date, ,     ,  ,  ,				 Y, ,  Y,
+M, T, Status,	Resident Status,	,	"SELECT Status FROM SeniorResidentStatus WHERE status NOT IN ('Applicant','Prospect') ORDER BY istatus",  TS.Status In ('#Status#'),	,	N,	,	Y,
+R, A, dat1:dat2,  Move-In Date, ,     ,  ,  ,				 N, ,  Y,
+0, A, Dpdate, Deposit As of Date, ,    ,  ,  ,    N,    N, Y,
+L, T, bActual, Actual or Schedule, ,    Actual^Scheduled^Scheduled Unit Transfer,  ,  , Y, ,  ,
+M, T, CareLvl,   Care Level, ,   "SELECT LTRIM(RTRIM(l1.listoptionname)) FROM listoption l1 WHERE l1.listname='Carelevel'",   LTRIM(RTRIM(l1.listoptionname))= '#CareLvl#', , , , ,
+M, T, ContTyp,   Contract Type, ,   "SELECT LTRIM(RTRIM(l1.listoptionname)) FROM listoption l1 WHERE l1.listname='ContractType'",   LTRIM(RTRIM(loct.listoptionname))in ('#ContTyp#'), , , , ,
+0, T, grp, GROUP BY, ,   "SELECT DISTINCT an.sSubgroup,an.sName FROM property p INNER JOIN AttributeXref ax ON ax.hFileRecord = p.hmy INNER JOIN attributeValue AV ON av.hmy = ax.hattributeValue INNER JOIN attributename AN ON av.hAttributename = an.hmy AND an.iFileType = 3 WHERE 1=1 #filter1# ORDER BY 1" , , , N, , N,
+L, T,  SumBy,     Summarize By, , Care Level^Unit Type^Community^Resident,  ,  , Y, ,  ,
+L, T,	   Aggregate,	    Aggregate, , Yes^No,  ,  ,    N,     ,     N,
+L, T,  sortKey,    Sort By, ,   Move-In Date^Resident Last Name^Unit,  ,  , Y, ,  ,
+L, T,  DisplayRates,    Display Rates, ,   Yes^No,  ,  , Y, ,  ,
+L, T,  SecResident,    Include Second Residents?, ,   Yes^No,  ,  , Y, ,  ,
+//End Filter
+
+ 
